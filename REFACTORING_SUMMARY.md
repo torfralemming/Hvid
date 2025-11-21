@@ -1,7 +1,7 @@
 # Refactoring Summary: Stateless Client-Side Application
 
 ## Overview
-Successfully refactored the POWER sales dashboard from a database-dependent application to a **100% stateless, client-side application** that relies on static configuration files and an external API.
+Successfully refactored the POWER sales dashboard from a database-dependent application to a **100% stateless, client-side application** that uses POWER's product data.
 
 ## Key Changes
 
@@ -18,138 +18,114 @@ Successfully refactored the POWER sales dashboard from a database-dependent appl
 src/
 ├── types/index.ts              # TypeScript interfaces
 ├── config/categories.ts        # Category definitions
-├── data/questions.ts           # Question logic and filters
-├── services/powerApi.ts        # API service with mock data
+├── data/questions.ts           # Question logic and filters (8 questions)
+├── services/powerApi.ts        # API service loading from POWER data
 └── utils/productFilters.ts     # Filtering and recommendation logic
 ```
 
-#### Key Files:
+### 3. Updated Question Flow ✅
 
-**`src/types/index.ts`**
-- `Product` interface: Standard product model
-- `Question` and `QuestionOption` interfaces: Question configuration
-- `FilterCriteria` and `FilterOperator`: Filtering logic types
+The application now has **8 comprehensive questions** that map to product specifications:
 
-**`src/config/categories.ts`**
-- Centralized category definitions
-- Easy enable/disable toggle per category
-- Currently only "Vaskemaskiner" (Washing Machines) enabled
+1. **Antal personer i husstanden** → Filters on capacity (6-10+ kg)
+2. **Vaskehyppighed** → Used for scoring (no direct filter)
+3. **Opfriskning af tøj** → Requires steam feature if often
+4. **Tøjets levetid** → Filters on energy class A if climate-conscious
+5. **Sæbedosering** → Requires AutoDose if guessing or eco-conscious
+6. **Mærke præference** → Filters on specific brand (AEG, Siemens, Miele, Electrolux)
+7. **Vasketid** → Filters on quick-wash programs if speed needed
+8. **Stryge skjorter** → Requires steam feature if yes
 
-**`src/data/questions.ts`**
-- Complete question configuration for Washing Machines
-- 3 questions with filter criteria:
-  1. Household size → capacity filter
-  2. Placement → depth filter for slim models
-  3. Special features → multi-select with feature filters
+### 4. POWER API Integration ✅
 
 **`src/services/powerApi.ts`**
-- `USE_MOCK_DATA` flag (currently `true`)
-- Mock dataset with 8 realistic washing machines
-- Prepared for POWER API integration when flag is set to `false`
-- Includes data normalization for external API
+- Loads product data from `/washing_machines.json` (stored in `public/` folder)
+- Data source: `washing_machines.json` with real POWER products
+- Automatic normalization of product data to internal format
+- Fallback to mock data if API fails
+- Feature detection: steam, autodose, quick-wash programs
+
+**Product Data Structure:**
+```json
+{
+  "id": "power-wm1001",
+  "name": "Samsung WW90T534DAW",
+  "price": 4999,
+  "energy_class": "A",
+  "capacity": 9,
+  "rpm": 1400,
+  "features": ["EcoBubble™", "Smart Control+", "QuickWash"],
+  "link": "https://www.power.dk/...",
+  "store": "Power"
+}
+```
+
+### 5. Smart Filtering System ✅
 
 **`src/utils/productFilters.ts`**
-- Product filtering based on selected options
-- "Good, Better, Best" recommendation algorithm
-- Match reason generation for user feedback
+- Applies all user-selected filters to product list
+- Supports multiple filter operators:
+  - `gte` (greater than or equal): capacity, rpm
+  - `lte` (less than or equal): noise, depth
+  - `eq` (equals): brand, energy class
+  - `contains`: features (steam, autodose, quick)
+- **Good/Better/Best Algorithm**:
+  - Filters products by ALL user requirements
+  - Sorts by price
+  - **God (Budget)**: Lowest price that matches
+  - **Bedre (Recommended)**: Mid-range price, best value
+  - **Bedst (Premium)**: Highest price, most features
 
-### 3. Refactored Components ✅
+### 6. How It Works
 
-**WashingMachineForm**
-- Step-by-step wizard with progress bar
-- Reads questions from static config
-- Supports single and multi-select questions
-- Clean, modern UI with POWER branding (orange #FF5800)
-
-**WashingMachineRecommendations**
-- Fetches products via API service
-- Applies filters from user selections
-- Displays 3-tier recommendations (Budget, Recommended, Premium)
-- Shows match reasons and product specifications
-
-**App.tsx**
-- Simplified homepage with category selection
-- Clean routing structure
-- Removed all admin/analytics functionality
-- POWER-branded design
-
-### 4. Removed Unused Code ✅
-Deleted the following components that relied on database:
-- `AdminDashboard.tsx`
-- `Analytics.tsx`
-- `LoginDialog.tsx`
-- `SignatureDialog.tsx`
-- `ProductList.tsx`
-- `ProductSearchDialog.tsx`
-- `PriceDialog.tsx`
-- `KeywordDialog.tsx`
-- `CategoryManagementDialog.tsx`
-- All other category form/recommendation components (Dishwasher, Oven, Refrigerator, TV)
-
-## How It Works
-
-### User Flow:
+#### User Flow:
 1. **Homepage**: Select "Vaskemaskiner" category
-2. **Wizard**: Answer 3 questions about needs
-3. **Results**: See 3 personalized recommendations (God, Bedre, Bedst)
+2. **Wizard**: Answer 8 questions (step-by-step with progress bar)
+3. **Results**: See 3 personalized recommendations from POWER's inventory
 
-### Data Flow:
+#### Data Flow:
 ```
-User Answers
+User selects answers with filters
     ↓
-Selected Options (with filters)
+fetchProducts('washing_machines')
     ↓
-API Service (mock data or POWER API)
+Loads /washing_machines.json (real POWER data)
     ↓
-Filter Products
+Normalize to internal Product format
     ↓
-Select Good/Better/Best
+Apply ALL filters from user answers
     ↓
-Display Recommendations
+Sort by price → Pick Budget/Mid/Premium
+    ↓
+Display 3 recommendations with match reasons
 ```
 
-### Filtering Logic:
-Each question option can have a filter:
-- `gte` (greater than or equal): For capacity, noise
-- `lte` (less than or equal): For depth, noise
-- `contains`: For features array
-- `eq` (equals): For exact matches
+### 7. Product Files
 
-## Mock Data
-The application includes 8 realistic washing machine products with:
-- Various brands (Bosch, Miele, Samsung, Electrolux, LG, Beko, Siemens, Whirlpool)
-- Price range: 2,999 kr - 9,499 kr
-- Capacity: 6-10 kg
-- Features: autodose, steam, wifi, quick-wash, etc.
-- Complete specifications (depth, spin speed, energy class, noise level)
+Current data files in project root:
+- `washing_machines.json` - Real POWER washing machine data (copied to `public/` during build)
+- `dishwashers.json` - POWER dishwasher data (not yet active)
+- `ovens.json` - POWER oven data (not yet active)
+- `refrigerators.json` - POWER refrigerator data (not yet active)
 
-## Switching to Live API
+### 8. Match Reason Generation
 
-To switch from mock data to the live POWER API:
-
-1. Open `src/services/powerApi.ts`
-2. Change `const USE_MOCK_DATA = true;` to `const USE_MOCK_DATA = false;`
-3. Ensure the API endpoint is correct: `https://api.power.dk/products?category=${category}`
-4. The `normalizeProducts` function will transform the API response to match our internal format
+The system explains WHY each product was recommended:
+- "Har 9 kg kapacitet" (matches household size)
+- "Smal model med 50 cm dybde" (matches placement)
+- "Støjsvag: 68 dB" (matches noise preference)
+- "Har automatisk dosering (autodose)" (matches dosing need)
+- "Har damp funktion" (matches steam requirement)
 
 ## Benefits
 
 ✅ **No Database Required**: Runs entirely in the browser
+✅ **Real POWER Data**: Uses actual product inventory
 ✅ **Fast Loading**: No backend queries, instant UI
-✅ **Easy Configuration**: Questions and logic in TypeScript files
-✅ **Scalable**: Easy to add new categories and questions
-✅ **Testable**: Mock data for development, switchable to live API
+✅ **Easy Configuration**: Questions in TypeScript, data in JSON
+✅ **Scalable**: Easy to add categories (just add JSON + questions)
+✅ **Smart Filtering**: Multiple criteria from 8 questions
 ✅ **Maintainable**: Clear separation of concerns
-
-## Next Steps
-
-To add more categories:
-1. Add category to `src/config/categories.ts` with `enabled: true`
-2. Create question configuration in `src/data/questions.ts`
-3. Update `getQuestionsByCategory()` function
-4. Add mock data to `src/services/powerApi.ts`
-5. Create form and recommendations components (or use generic ones)
-6. Add routes in `App.tsx`
 
 ## Running the Application
 
@@ -158,7 +134,36 @@ npm install
 npm run dev
 ```
 
-The application will start on `http://localhost:5173` and work completely offline with mock data.
+The application will start on `http://localhost:5173` and load washing machines from `/washing_machines.json`.
+
+## Adding More Categories
+
+To add dishwashers, ovens, or refrigerators:
+
+1. Enable category in `src/config/categories.ts`:
+   ```ts
+   { id: 'dishwashers', name: 'Opvaskemaskiner', icon: '🍽️', enabled: true }
+   ```
+
+2. Copy JSON file to `public/` folder:
+   ```bash
+   cp dishwashers.json public/
+   ```
+
+3. Create question configuration in `src/data/questions.ts`:
+   ```ts
+   export const CATEGORY_DISHWASHERS: CategoryConfig = { ... }
+   ```
+
+4. Update `fetchProducts()` in `src/services/powerApi.ts`:
+   ```ts
+   if (category === 'dishwashers') {
+     const response = await fetch('/dishwashers.json');
+     ...
+   }
+   ```
+
+5. Add routes in `App.tsx`
 
 ## Technical Stack
 
@@ -169,4 +174,15 @@ The application will start on `http://localhost:5173` and work completely offlin
 - Tailwind CSS
 - Lucide React (icons)
 
-No authentication, no database, no backend required!
+**No authentication, no database, no backend required!**
+
+## Current Features Detected
+
+The filtering system recognizes these features in product data:
+- `steam` / `steamcare` - Steam functionality for refreshing clothes
+- `autodose` / `twindos` - Automatic detergent dosing
+- `quick` / `quickwash` / `turbowash` - Fast wash programs
+- `wifi` / `smart` - Smart connectivity
+- `inverter` - Efficient motor technology
+
+All feature matching is case-insensitive and partial-match enabled.
