@@ -114,7 +114,8 @@ const extractCapacity = (name: string): number => {
 };
 
 const extractImageUrl = (item: any): string => {
-  return '';
+  // Use a generic placeholder icon since Power CDN images require unique hashes
+  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiNGNUY1RjUiLz48Y2lyY2xlIGN4PSIyMDAiIGN5PSIyMDAiIHI9IjgwIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iOCIgZmlsbD0id2hpdGUiLz48L3N2Zz4=';
 };
 
 const getMockData = (category: string): Product[] => {
