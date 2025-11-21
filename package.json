@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "scrape": "tsx scripts/scrape-products.ts",
     "update-washing-machines": "tsx scripts/update-washing-machines.ts",
-    "update-all-products": "tsx scripts/update-all-products.ts"
+    "update-all-products": "tsx scripts/update-all-products.ts",
+    "scrape-images": "tsx scripts/scrape-images.ts"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
