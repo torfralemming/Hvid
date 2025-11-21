@@ -1,7 +1,15 @@
 import { Product, FilterCriteria, QuestionOption } from '../types';
 
 export const applyFilter = (product: Product, filter: FilterCriteria): boolean => {
-  const value = product.specs[filter.field];
+  let value: any;
+
+  if (filter.field === 'brand') {
+    value = product.brand;
+  } else if (filter.field === 'features') {
+    value = product.features;
+  } else {
+    value = product.specs[filter.field];
+  }
 
   switch (filter.operator) {
     case 'gte':
@@ -9,6 +17,9 @@ export const applyFilter = (product: Product, filter: FilterCriteria): boolean =
     case 'lte':
       return typeof value === 'number' && value <= (filter.value as number);
     case 'eq':
+      if (filter.field === 'brand') {
+        return product.brand?.toLowerCase() === (filter.value as string).toLowerCase();
+      }
       return value === filter.value;
     case 'contains':
       if (Array.isArray(product.features)) {
@@ -26,12 +37,37 @@ export const filterProducts = (
   products: Product[],
   selectedOptions: QuestionOption[]
 ): Product[] => {
-  return products.filter(product => {
-    return selectedOptions.every(option => {
-      if (!option.filter) return true;
-      return applyFilter(product, option.filter);
-    });
+  console.log('🔍 Filtering products:', {
+    totalProducts: products.length,
+    filters: selectedOptions.filter(o => o.filter).map(o => ({
+      field: o.filter?.field,
+      operator: o.filter?.operator,
+      value: o.filter?.value
+    }))
   });
+
+  const filtered = products.filter(product => {
+    const passes = selectedOptions.every(option => {
+      if (!option.filter) return true;
+      const result = applyFilter(product, option.filter);
+      if (!result) {
+        console.log(`❌ Product ${product.name} failed filter:`, option.filter);
+      }
+      return result;
+    });
+    if (passes) {
+      console.log('✅ Product passed all filters:', product.name);
+    }
+    return passes;
+  });
+
+  console.log('📊 Filtering results:', {
+    input: products.length,
+    output: filtered.length,
+    filtered: filtered.map(p => p.name)
+  });
+
+  return filtered;
 };
 
 export interface RecommendationTier {

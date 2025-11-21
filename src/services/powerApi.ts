@@ -12,18 +12,24 @@ export const fetchProducts = async (category: string): Promise<Product[]> => {
     let data: any[] = [];
 
     if (category === 'washing_machines') {
+      console.log('📥 Fetching washing machines from /washing_machines.json');
       const response = await fetch('/washing_machines.json');
       if (!response.ok) {
         throw new Error('Failed to fetch washing machines from API');
       }
       data = await response.json();
+      console.log('✅ Raw data fetched:', data.length, 'products');
     } else {
       return [];
     }
 
-    return normalizeProducts(data, category);
+    const normalized = normalizeProducts(data, category);
+    console.log('🔄 Normalized products:', normalized.length);
+    console.log('📦 Sample product:', normalized[0]);
+    return normalized;
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('❌ Error fetching products:', error);
+    console.log('⚠️ Falling back to mock data');
     return getMockData(category);
   }
 };
@@ -31,14 +37,13 @@ export const fetchProducts = async (category: string): Promise<Product[]> => {
 const normalizeProducts = (data: any[], category: string): Product[] => {
   return data.map(item => {
     const features: string[] = Array.isArray(item.features) ? item.features : [];
+    const brand = extractBrand(item.name) || item.brand || item.manufacturer || 'Ukendt';
 
-    const normalizedFeatures = features.map(f => f.toLowerCase());
-
-    return {
+    const product = {
       id: item.id || `product-${Math.random()}`,
       sku: item.id || item.sku || '',
       name: item.name || item.title || 'Ukendt produkt',
-      brand: extractBrand(item.name) || item.brand || item.manufacturer || 'Ukendt',
+      brand: brand,
       price: item.price || 0,
       image: item.image || item.imageUrl || 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400',
       category: category,
@@ -49,8 +54,17 @@ const normalizeProducts = (data: any[], category: string): Product[] => {
         noiseDB: item.noise_level || item.noiseDB || 70,
         depth: item.depth || 60
       },
-      features: normalizedFeatures
+      features: features
     };
+
+    console.log('🔨 Normalized product:', {
+      name: product.name,
+      brand: product.brand,
+      capacity: product.specs.capacity,
+      features: product.features
+    });
+
+    return product;
   });
 };
 

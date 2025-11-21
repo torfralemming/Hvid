@@ -20,7 +20,10 @@ function WashingMachineRecommendations() {
         setLoading(true);
         setError(null);
 
+        console.log('🎯 Loading recommendations with options:', selectedOptions);
+
         const products = await fetchProducts('washing_machines');
+        console.log('📦 Fetched products:', products.length);
 
         if (products.length === 0) {
           setError('Ingen produkter fundet. Prøv igen senere.');
@@ -28,16 +31,20 @@ function WashingMachineRecommendations() {
         }
 
         const filteredProducts = filterProducts(products, selectedOptions);
+        console.log('✅ Filtered products:', filteredProducts.length);
 
         if (filteredProducts.length === 0) {
-          setError('Ingen produkter matcher dine kriterier. Prøv at justere dine valg.');
+          console.warn('⚠️ No products matched filters, showing all products');
+          const tiers = selectGoodBetterBest(products);
+          setRecommendations(tiers);
           return;
         }
 
         const tiers = selectGoodBetterBest(filteredProducts);
+        console.log('🎁 Final recommendations:', tiers.length);
         setRecommendations(tiers);
       } catch (err) {
-        console.error('Error loading recommendations:', err);
+        console.error('❌ Error loading recommendations:', err);
         setError('Noget gik galt. Prøv igen senere.');
       } finally {
         setLoading(false);
