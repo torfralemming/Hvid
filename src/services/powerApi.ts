@@ -114,23 +114,31 @@ const extractCapacity = (name: string): number => {
 };
 
 const extractImageUrl = (item: any): string => {
-  const fallbackImage = 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400';
+  const fallbackImage = 'https://via.placeholder.com/400x400?text=No+Image';
+
+  if (item.link && typeof item.link === 'string') {
+    const match = item.link.match(/\/p-(\d+)\//);
+    if (match && match[1]) {
+      const productCode = match[1];
+      return `https://media.power-cdn.net/images/products/${productCode}/${productCode}_1_1200x1200_w_g.jpg`;
+    }
+  }
 
   if (item.images && Array.isArray(item.images) && item.images.length > 0) {
     const primaryImage = item.images[0];
-    if (typeof primaryImage === 'string') {
+    if (typeof primaryImage === 'string' && !primaryImage.includes('unsplash')) {
       return primaryImage;
     }
-    if (primaryImage.url) {
+    if (primaryImage.url && !primaryImage.url.includes('unsplash')) {
       return primaryImage.url;
     }
   }
 
-  if (item.image) {
+  if (item.image && typeof item.image === 'string' && !item.image.includes('unsplash')) {
     return item.image;
   }
 
-  if (item.imageUrl) {
+  if (item.imageUrl && typeof item.imageUrl === 'string' && !item.imageUrl.includes('unsplash')) {
     return item.imageUrl;
   }
 
@@ -138,11 +146,8 @@ const extractImageUrl = (item: any): string => {
     return `https://media.power-cdn.net/images/products/${item.code}/${item.code}_1_1200x1200_w_g.jpg`;
   }
 
-  if (item.id && typeof item.id === 'string' && item.id.includes('-')) {
-    const productCode = item.id.split('-').pop();
-    if (productCode && !isNaN(Number(productCode))) {
-      return `https://media.power-cdn.net/images/products/${productCode}/${productCode}_1_1200x1200_w_g.jpg`;
-    }
+  if (item.productCode) {
+    return `https://media.power-cdn.net/images/products/${item.productCode}/${item.productCode}_1_1200x1200_w_g.jpg`;
   }
 
   return fallbackImage;
