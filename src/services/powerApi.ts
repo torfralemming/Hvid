@@ -36,8 +36,10 @@ export const fetchProducts = async (category: string): Promise<Product[]> => {
 
 const normalizeProducts = (data: any[], category: string): Product[] => {
   return data.map(item => {
-    const features: string[] = Array.isArray(item.features) ? item.features : [];
+    const rawFeatures: string[] = Array.isArray(item.features) ? item.features : [];
     const brand = extractBrand(item.name) || item.brand || item.manufacturer || 'Ukendt';
+
+    const normalizedFeatures = normalizeFeatures(rawFeatures);
 
     const product = {
       id: item.id || `product-${Math.random()}`,
@@ -54,18 +56,43 @@ const normalizeProducts = (data: any[], category: string): Product[] => {
         noiseDB: item.noise_level || item.noiseDB || 70,
         depth: item.depth || 60
       },
-      features: features
+      features: normalizedFeatures
     };
 
     console.log('🔨 Normalized product:', {
       name: product.name,
       brand: product.brand,
       capacity: product.specs.capacity,
-      features: product.features
+      rawFeatures: rawFeatures,
+      normalizedFeatures: product.features
     });
 
     return product;
   });
+};
+
+const normalizeFeatures = (features: string[]): string[] => {
+  const normalized: string[] = [];
+
+  features.forEach(feature => {
+    const lower = feature.toLowerCase();
+
+    if (lower.includes('steam') || lower.includes('damp')) {
+      normalized.push('steam');
+    }
+
+    if (lower.includes('quick') || lower.includes('turbo') || lower.includes('power') && lower.includes('wash')) {
+      normalized.push('quick_program');
+    }
+
+    if (lower.includes('autodose') || lower.includes('twindo') || lower.includes('auto') && lower.includes('dos')) {
+      normalized.push('autodose');
+    }
+
+    normalized.push(feature);
+  });
+
+  return normalized;
 };
 
 const extractBrand = (name: string): string | null => {

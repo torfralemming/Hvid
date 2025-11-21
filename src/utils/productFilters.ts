@@ -43,34 +43,55 @@ export const filterProducts = (
   products: Product[],
   selectedOptions: QuestionOption[]
 ): Product[] => {
+  const activeFilters = selectedOptions.filter(o => o.filter);
+
   console.log('🔍 Filtering products:', {
     totalProducts: products.length,
-    filters: selectedOptions.filter(o => o.filter).map(o => ({
+    totalOptions: selectedOptions.length,
+    activeFilters: activeFilters.length,
+    filters: activeFilters.map(o => ({
+      label: o.label,
       field: o.filter?.field,
       operator: o.filter?.operator,
       value: o.filter?.value
     }))
   });
 
+  if (activeFilters.length === 0) {
+    console.log('⚠️ No filters applied, returning all products');
+    return products;
+  }
+
   const filtered = products.filter(product => {
+    console.log(`\n🔎 Testing product: ${product.name}`);
+    console.log('  - Brand:', product.brand);
+    console.log('  - Capacity:', product.specs.capacity);
+    console.log('  - Features:', product.features);
+
     const passes = selectedOptions.every(option => {
-      if (!option.filter) return true;
-      const result = applyFilter(product, option.filter);
-      if (!result) {
-        console.log(`❌ Product ${product.name} failed filter:`, option.filter);
+      if (!option.filter) {
+        console.log(`  ⏭️  No filter for option: ${option.label}`);
+        return true;
       }
+
+      const result = applyFilter(product, option.filter);
+      console.log(`  ${result ? '✅' : '❌'} Filter "${option.label}":`, option.filter, '→', result);
       return result;
     });
+
     if (passes) {
-      console.log('✅ Product passed all filters:', product.name);
+      console.log(`  ✅ PASSED: ${product.name}`);
+    } else {
+      console.log(`  ❌ FAILED: ${product.name}`);
     }
+
     return passes;
   });
 
-  console.log('📊 Filtering results:', {
+  console.log('\n📊 Filtering results:', {
     input: products.length,
     output: filtered.length,
-    filtered: filtered.map(p => p.name)
+    filtered: filtered.map(p => ({ name: p.name, price: p.price }))
   });
 
   return filtered;
