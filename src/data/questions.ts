@@ -11,21 +11,25 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
         {
           label: '1 person',
           value: '1',
+          customerTags: ['Single Household'],
           filter: { field: 'capacity', operator: 'gte', value: 6 }
         },
         {
           label: '2-3 personer',
           value: '2-3',
+          customerTags: ['Regular Family'],
           filter: { field: 'capacity', operator: 'gte', value: 8 }
         },
         {
           label: '4-5 personer',
           value: '4-5',
+          customerTags: ['Large Family'],
           filter: { field: 'capacity', operator: 'gte', value: 9 }
         },
         {
           label: '5 eller flere',
           value: '5+',
+          customerTags: ['XL Household'],
           filter: { field: 'capacity', operator: 'gte', value: 10 }
         }
       ]
@@ -34,10 +38,26 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
       id: 'frequency',
       question: 'Hvor ofte vasker du/i?',
       options: [
-        { label: 'Hver dag', value: 'daily' },
-        { label: '4-6 gange om ugen', value: 'high' },
-        { label: '2-3 gange om ugen', value: 'medium' },
-        { label: '1 gang om ugen', value: 'low' }
+        {
+          label: 'Hver dag',
+          value: 'daily',
+          customerTags: ['Heavy User']
+        },
+        {
+          label: '4-6 gange om ugen',
+          value: 'high',
+          customerTags: ['Frequent User']
+        },
+        {
+          label: '2-3 gange om ugen',
+          value: 'medium',
+          customerTags: ['Average User']
+        },
+        {
+          label: '1 gang om ugen',
+          value: 'low',
+          customerTags: ['Light User']
+        }
       ]
     },
     {
@@ -47,15 +67,18 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
         {
           label: 'Næsten hver gang (Jeg vil bare friske det op)',
           value: 'often',
-          filter: { field: 'features', operator: 'contains', value: 'steam' }
+          customerTags: ['Steam Lover'],
+          filter: { field: 'features', operator: 'includes', value: 'steam' }
         },
         {
           label: 'Det sker af og til',
-          value: 'sometimes'
+          value: 'sometimes',
+          customerTags: ['Steam Interested']
         },
         {
           label: 'Aldrig, alt mit tøj er beskidt',
-          value: 'never'
+          value: 'never',
+          customerTags: ['Traditional Washer']
         }
       ]
     },
@@ -63,17 +86,27 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
       id: 'clothing_care',
       question: 'Hvad betyder det for dig/jer at tøj holder så længe som muligt?',
       options: [
-        { label: 'Vi køber bare noget nyt, når det er slidt', value: 'low_care' },
+        {
+          label: 'Vi køber bare noget nyt, når det er slidt',
+          value: 'low_care',
+          customerTags: ['Fast Consumer']
+        },
         {
           label: 'Jeg har meget dyrt tøj, jeg gerne vil passe på',
-          value: 'high_care'
+          value: 'high_care',
+          customerTags: ['Gentle Care Needed']
         },
         {
           label: 'Jeg vil gerne passe på klimaet (tøj skal holde)',
           value: 'climate',
-          filter: { field: 'energyClass', operator: 'eq', value: 'A' }
+          customerTags: ['Eco Warrior'],
+          filter: { field: 'energyLabel', operator: 'equals', value: 'A' }
         },
-        { label: 'Det har jeg ingen holdning til', value: 'neutral' }
+        {
+          label: 'Det har jeg ingen holdning til',
+          value: 'neutral',
+          customerTags: ['Pragmatic']
+        }
       ]
     },
     {
@@ -83,14 +116,24 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
         {
           label: 'Det ved jeg ikke, jeg gætter',
           value: 'guess',
-          filter: { field: 'features', operator: 'contains', value: 'autodose' }
+          customerTags: ['AutoDose Candidate'],
+          filter: { field: 'features', operator: 'includes', value: 'autodose' }
         },
-        { label: 'Det betyder ikke noget for mig', value: 'indifferent' },
-        { label: 'Jeg vejer mit tøj hver gang', value: 'manual_expert' },
+        {
+          label: 'Det betyder ikke noget for mig',
+          value: 'indifferent',
+          customerTags: ['Basic User']
+        },
+        {
+          label: 'Jeg vejer mit tøj hver gang',
+          value: 'manual_expert',
+          customerTags: ['Manual Pro']
+        },
         {
           label: 'Det ved jeg ikke, men vil gerne skåne miljøet',
           value: 'eco_conscious',
-          filter: { field: 'features', operator: 'contains', value: 'autodose' }
+          customerTags: ['Eco Saver'],
+          filter: { field: 'features', operator: 'includes', value: 'autodose' }
         }
       ]
     },
@@ -98,11 +141,35 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
       id: 'brand_preference',
       question: 'Hvor meget betyder mærket på vaskemaskinen for dig?',
       options: [
-        { label: 'Det skal være AEG', value: 'AEG', filter: { field: 'brand', operator: 'eq', value: 'AEG' } },
-        { label: 'Det skal være Siemens', value: 'Siemens', filter: { field: 'brand', operator: 'eq', value: 'Siemens' } },
-        { label: 'Det skal være Miele', value: 'Miele', filter: { field: 'brand', operator: 'eq', value: 'Miele' } },
-        { label: 'Det skal være Electrolux', value: 'Electrolux', filter: { field: 'brand', operator: 'eq', value: 'Electrolux' } },
-        { label: 'Det betyder ikke noget hvilket mærke det er', value: 'any' }
+        {
+          label: 'Det skal være AEG',
+          value: 'AEG',
+          customerTags: ['AEG Loyal'],
+          filter: { field: 'brand', operator: 'equals', value: 'AEG' }
+        },
+        {
+          label: 'Det skal være Siemens',
+          value: 'Siemens',
+          customerTags: ['Siemens Loyal'],
+          filter: { field: 'brand', operator: 'equals', value: 'Siemens' }
+        },
+        {
+          label: 'Det skal være Miele',
+          value: 'Miele',
+          customerTags: ['Miele Loyal'],
+          filter: { field: 'brand', operator: 'equals', value: 'Miele' }
+        },
+        {
+          label: 'Det skal være Electrolux',
+          value: 'Electrolux',
+          customerTags: ['Electrolux Loyal'],
+          filter: { field: 'brand', operator: 'equals', value: 'Electrolux' }
+        },
+        {
+          label: 'Det betyder ikke noget',
+          value: 'any',
+          customerTags: ['Brand Agnostic']
+        }
       ]
     },
     {
@@ -111,15 +178,25 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
       options: [
         {
           label: 'Hurtigt, men økonomisk (ca. 1 time)',
-          value: 'fast_eco'
+          value: 'fast_eco',
+          customerTags: ['Efficiency Seeker']
         },
         {
           label: 'Bare hurtigt, pris ligemeget (ca. 1 time)',
           value: 'fast_any',
-          filter: { field: 'features', operator: 'contains', value: 'quick' }
+          customerTags: ['Time Saver'],
+          filter: { field: 'features', operator: 'includes', value: 'quick_program' }
         },
-        { label: 'Vaskens længde har ingen betydning', value: 'any_time' },
-        { label: 'Skal være billig i drift (lange øko programmer)', value: 'eco_slow' }
+        {
+          label: 'Vaskens længde har ingen betydning',
+          value: 'any_time',
+          customerTags: ['Flexible User']
+        },
+        {
+          label: 'Skal være billig i drift (lange øko programmer)',
+          value: 'eco_slow',
+          customerTags: ['Economy Saver']
+        }
       ]
     },
     {
@@ -129,9 +206,14 @@ export const CATEGORY_WASHING_MACHINES: CategoryConfig = {
         {
           label: 'Ja',
           value: 'yes',
-          filter: { field: 'features', operator: 'contains', value: 'steam' }
+          customerTags: ['Ironing Hater'],
+          filter: { field: 'features', operator: 'includes', value: 'steam' }
         },
-        { label: 'Nej', value: 'no' }
+        {
+          label: 'Nej',
+          value: 'no',
+          customerTags: ['No Iron Needs']
+        }
       ]
     }
   ]

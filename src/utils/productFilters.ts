@@ -17,11 +17,17 @@ export const applyFilter = (product: Product, filter: FilterCriteria): boolean =
     case 'lte':
       return typeof value === 'number' && value <= (filter.value as number);
     case 'eq':
+    case 'equals':
       if (filter.field === 'brand') {
         return product.brand?.toLowerCase() === (filter.value as string).toLowerCase();
       }
+      if (filter.field === 'energyLabel' || filter.field === 'energyClass') {
+        const energyClass = product.specs.energyClass || product.specs.energyLabel;
+        return energyClass === filter.value;
+      }
       return value === filter.value;
     case 'contains':
+    case 'includes':
       if (Array.isArray(product.features)) {
         return product.features.some(f =>
           f.toLowerCase().includes((filter.value as string).toLowerCase())

@@ -10,7 +10,7 @@ export interface Product {
   features: string[];
 }
 
-export type FilterOperator = 'gte' | 'lte' | 'eq' | 'contains';
+export type FilterOperator = 'gte' | 'lte' | 'eq' | 'contains' | 'equals' | 'includes';
 
 export interface FilterCriteria {
   field: string;
@@ -21,6 +21,7 @@ export interface FilterCriteria {
 export interface QuestionOption {
   label: string;
   value: string;
+  customerTags: string[];
   filter?: FilterCriteria;
 }
 

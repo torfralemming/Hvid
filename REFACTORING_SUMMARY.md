@@ -23,18 +23,35 @@ src/
 └── utils/productFilters.ts     # Filtering and recommendation logic
 ```
 
-### 3. Updated Question Flow ✅
+### 3. Updated Question Flow with Customer Needs ✅
 
-The application now has **8 comprehensive questions** that map to product specifications:
+The application now has **8 comprehensive questions** that map to both product specifications AND customer needs (tags):
 
 1. **Antal personer i husstanden** → Filters on capacity (6-10+ kg)
-2. **Vaskehyppighed** → Used for scoring (no direct filter)
+   - Tags: Single Household, Regular Family, Large Family, XL Household
+
+2. **Vaskehyppighed** → Used for customer profiling
+   - Tags: Heavy User, Frequent User, Average User, Light User
+
 3. **Opfriskning af tøj** → Requires steam feature if often
+   - Tags: Steam Lover, Steam Interested, Traditional Washer
+
 4. **Tøjets levetid** → Filters on energy class A if climate-conscious
+   - Tags: Fast Consumer, Gentle Care Needed, Eco Warrior, Pragmatic
+
 5. **Sæbedosering** → Requires AutoDose if guessing or eco-conscious
+   - Tags: AutoDose Candidate, Basic User, Manual Pro, Eco Saver
+
 6. **Mærke præference** → Filters on specific brand (AEG, Siemens, Miele, Electrolux)
+   - Tags: AEG Loyal, Siemens Loyal, Miele Loyal, Electrolux Loyal, Brand Agnostic
+
 7. **Vasketid** → Filters on quick-wash programs if speed needed
+   - Tags: Efficiency Seeker, Time Saver, Flexible User, Economy Saver
+
 8. **Stryge skjorter** → Requires steam feature if yes
+   - Tags: Ironing Hater, No Iron Needs
+
+**Each answer captures customer needs (tags) for profiling and analytics!**
 
 ### 4. POWER API Integration ✅
 
@@ -85,7 +102,7 @@ The application now has **8 comprehensive questions** that map to product specif
 
 #### Data Flow:
 ```
-User selects answers with filters
+User selects answers with filters + customer tags
     ↓
 fetchProducts('washing_machines')
     ↓
@@ -98,6 +115,8 @@ Apply ALL filters from user answers
 Sort by price → Pick Budget/Mid/Premium
     ↓
 Display 3 recommendations with match reasons
+    ↓
+Show customer needs/tags on results page
 ```
 
 ### 7. Product Files

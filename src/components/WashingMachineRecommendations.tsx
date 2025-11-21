@@ -14,6 +14,16 @@ function WashingMachineRecommendations() {
 
   const selectedOptions: QuestionOption[] = location.state?.selectedOptions || [];
 
+  const getCustomerTags = (): string[] => {
+    const allTags: string[] = [];
+    selectedOptions.forEach(option => {
+      if (option.customerTags) {
+        allTags.push(...option.customerTags);
+      }
+    });
+    return [...new Set(allTags)];
+  };
+
   useEffect(() => {
     const loadRecommendations = async () => {
       try {
@@ -21,6 +31,7 @@ function WashingMachineRecommendations() {
         setError(null);
 
         console.log('🎯 Loading recommendations with options:', selectedOptions);
+        console.log('🏷️ Customer tags:', getCustomerTags());
 
         const products = await fetchProducts('washing_machines');
         console.log('📦 Fetched products:', products.length);
@@ -140,9 +151,25 @@ function WashingMachineRecommendations() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Dine anbefalinger
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 mb-6">
             Vi har fundet {recommendations.length} vaskemaskine{recommendations.length !== 1 ? 'r' : ''} baseret på dine behov
           </p>
+
+          {getCustomerTags().length > 0 && (
+            <div className="bg-orange-50 rounded-lg p-6 max-w-2xl mx-auto">
+              <h3 className="text-sm font-semibold text-orange-900 mb-3">Dine behov:</h3>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {getCustomerTags().map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-white text-orange-700 px-3 py-1 rounded-full text-sm font-medium shadow-sm"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
