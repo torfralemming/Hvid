@@ -54,7 +54,7 @@ function WashingMachineForm() {
       selectedAnswers.forEach(options => {
         allSelectedOptions.push(...options);
       });
-      navigate('/washing-machine/recommendations', {
+      navigate('/washing_machines/recommendations', {
         state: { selectedOptions: allSelectedOptions }
       });
     }
@@ -72,7 +72,7 @@ function WashingMachineForm() {
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12">
       <div className="max-w-3xl mx-auto px-4">
         <button
-          onClick={() => navigate('/')}
+          onClick={handleBack}
           className="flex items-center text-orange-600 hover:text-orange-800 mb-8"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />

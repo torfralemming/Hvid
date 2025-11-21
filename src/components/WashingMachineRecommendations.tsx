@@ -116,7 +116,7 @@ function WashingMachineRecommendations() {
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12">
         <div className="max-w-6xl mx-auto px-4">
           <button
-            onClick={() => navigate('/washing-machine')}
+            onClick={() => navigate('/washing_machines')}
             className="flex items-center text-orange-600 hover:text-orange-800 mb-8"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -125,7 +125,7 @@ function WashingMachineRecommendations() {
           <div className="bg-white rounded-xl shadow-lg p-8 text-center">
             <p className="text-xl text-red-600 mb-4">{error}</p>
             <button
-              onClick={() => navigate('/washing-machine')}
+              onClick={() => navigate('/washing_machines')}
               className="bg-orange-600 text-white py-3 px-6 rounded-lg hover:bg-orange-700"
             >
               Prøv igen
@@ -140,7 +140,7 @@ function WashingMachineRecommendations() {
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white py-12">
       <div className="max-w-6xl mx-auto px-4">
         <button
-          onClick={() => navigate('/washing-machine')}
+          onClick={() => navigate('/washing_machines')}
           className="flex items-center text-orange-600 hover:text-orange-800 mb-8"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
