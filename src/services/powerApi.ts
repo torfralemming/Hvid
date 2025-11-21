@@ -41,13 +41,15 @@ const normalizeProducts = (data: any[], category: string): Product[] => {
 
     const normalizedFeatures = normalizeFeatures(rawFeatures);
 
+    const imageUrl = extractImageUrl(item);
+
     const product = {
       id: item.id || `product-${Math.random()}`,
       sku: item.id || item.sku || '',
       name: item.name || item.title || 'Ukendt produkt',
       brand: brand,
       price: item.price || 0,
-      image: item.image || item.imageUrl || 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400',
+      image: imageUrl,
       category: category,
       specs: {
         capacity: item.capacity || extractCapacity(item.name),
@@ -63,6 +65,7 @@ const normalizeProducts = (data: any[], category: string): Product[] => {
       name: product.name,
       brand: product.brand,
       capacity: product.specs.capacity,
+      image: product.image,
       rawFeatures: rawFeatures,
       normalizedFeatures: product.features
     });
@@ -108,6 +111,41 @@ const extractBrand = (name: string): string | null => {
 const extractCapacity = (name: string): number => {
   const match = name.match(/(\d+)\s*kg/i);
   return match ? parseInt(match[1]) : 8;
+};
+
+const extractImageUrl = (item: any): string => {
+  const fallbackImage = 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400';
+
+  if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+    const primaryImage = item.images[0];
+    if (typeof primaryImage === 'string') {
+      return primaryImage;
+    }
+    if (primaryImage.url) {
+      return primaryImage.url;
+    }
+  }
+
+  if (item.image) {
+    return item.image;
+  }
+
+  if (item.imageUrl) {
+    return item.imageUrl;
+  }
+
+  if (item.code) {
+    return `https://media.power-cdn.net/images/products/${item.code}/${item.code}_1_1200x1200_w_g.jpg`;
+  }
+
+  if (item.id && typeof item.id === 'string' && item.id.includes('-')) {
+    const productCode = item.id.split('-').pop();
+    if (productCode && !isNaN(Number(productCode))) {
+      return `https://media.power-cdn.net/images/products/${productCode}/${productCode}_1_1200x1200_w_g.jpg`;
+    }
+  }
+
+  return fallbackImage;
 };
 
 const getMockData = (category: string): Product[] => {
