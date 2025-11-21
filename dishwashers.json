@@ -1,0 +1,60 @@
+[
+  {
+    "id": "power-dw1001",
+    "name": "Bosch Serie 4 SMV4HCX48E",
+    "price": 5999,
+    "image": "https://www.power.dk/images/h-7c6271ae87d514c5c2a3e8d840a65d98/products/1064698/1064698_1_900x900_w_g.jpg",
+    "energy_class": "C",
+    "capacity": 13,
+    "noise_level": 44,
+    "features": [
+      "EcoSilence Drive",
+      "ExtraDry",
+      "VarioDrawer",
+      "InfoLight",
+      "AquaStop"
+    ],
+    "rating": 4.5,
+    "link": "https://www.power.dk/hvidevarer/opvaskemaskine/integrerbare-opvaskemaskiner/bosch-serie-4-smv4hcx48e-integreret-opvaskemaskine/p-1064698/",
+    "store": "Power",
+    "description": "Støjsvag og energieffektiv opvaskemaskine med plads til 13 kuverter. Perfekt til mindre familier.",
+    "keywords": [
+      "household-couple",
+      "glass-no",
+      "usage-all",
+      "type-integrated",
+      "noise-bedroom-nearby",
+      "lifespan-mid"
+    ],
+    "tier": "mid"
+  },
+  {
+    "id": "power-dw1002",
+    "name": "Siemens iQ500 SN65ZX49CE",
+    "price": 8999,
+    "image": "https://www.power.dk/images/h-7c6271ae87d514c5c2a3e8d840a65d98/products/1157268/1157268_1_900x900_w_g.jpg",
+    "energy_class": "C",
+    "capacity": 14,
+    "noise_level": 42,
+    "features": [
+      "Zeolith tørring",
+      "Home Connect",
+      "brilliantShine system",
+      "Silence program",
+      "emotionLight"
+    ],
+    "rating": 4.8,
+    "link": "https://www.power.dk/hvidevarer/opvaskemaskine/integrerbare-opvaskemaskiner/siemens-iq500-sn65zx49ce-integreret-opvaskemaskine/p-1157268/",
+    "store": "Power",
+    "description": "Premium opvaskemaskine med Zeolith-tørring og særlig skånsom behandling af glas.",
+    "keywords": [
+      "household-family",
+      "glass-PerfectGlassCare",
+      "usage-all",
+      "type-integrated",
+      "noise-bedroom-nearby",
+      "lifespan-high"
+    ],
+    "tier": "premium"
+  }
+]

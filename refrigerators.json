@@ -1,0 +1,66 @@
+[
+  {
+    "id": "power-rf1001",
+    "name": "Samsung RB34T632ESA/EF",
+    "price": 6999,
+    "image": "https://www.power.dk/images/products/1064254/primary/large",
+    "energy_class": "E",
+    "capacity": 344,
+    "features": [
+      "SpaceMax™",
+      "NoFrost",
+      "Digital Inverter",
+      "Metal Cooling",
+      "LED Display"
+    ],
+    "rating": 4.6,
+    "link": "https://www.power.dk/hvidevarer/koeleskab/koele-fryseskab/samsung-rb34t632esaef-koelefryseskab/p-1064254/",
+    "store": "Power",
+    "description": "Rummeligt køle/fryseskab med NoFrost og smart teknologi",
+    "keywords": [
+      "household-family",
+      "shopping-weeklyshopping",
+      "storage-meatdairy",
+      "energy-energysaving",
+      "freezer-bigfreezer",
+      "noise-quiet",
+      "dispenser-standarddoor",
+      "smart-nosmart",
+      "design-premiumdesign",
+      "size-standardfit"
+    ],
+    "tier": "mid"
+  },
+  {
+    "id": "power-rf1002",
+    "name": "LG GBB92STAXP",
+    "price": 9999,
+    "image": "https://www.power.dk/images/products/1161524/primary/large",
+    "energy_class": "D",
+    "capacity": 384,
+    "features": [
+      "DoorCooling+™",
+      "LinearCooling™",
+      "Smart ThinQ™",
+      "Fresh Balancer™",
+      "Metal Fresh™"
+    ],
+    "rating": 4.8,
+    "link": "https://www.power.dk/hvidevarer/koeleskab/koele-fryseskab/lg-gbb92staxp-koelefryseskab/p-1161524/",
+    "store": "Power",
+    "description": "Premium køle/fryseskab med smart teknologi og optimal friskholdelse",
+    "keywords": [
+      "household-largefamily",
+      "shopping-dailyshopping",
+      "storage-vegstorage",
+      "energy-performance",
+      "freezer-bigfreezer",
+      "noise-quiet",
+      "dispenser-standarddoor",
+      "smart-smartcontrol",
+      "design-premiumdesign",
+      "size-standardfit"
+    ],
+    "tier": "premium"
+  }
+]

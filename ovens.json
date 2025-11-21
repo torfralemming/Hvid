@@ -1,0 +1,59 @@
+[
+  {
+    "id": "power-ov1001",
+    "name": "Siemens iQ500 HB578ABS0S",
+    "price": 7999,
+    "image": "https://www.power.dk/images/products/1064254/primary/large",
+    "energy_class": "A",
+    "capacity": 71,
+    "features": [
+      "4D varmluft",
+      "Pyrolyse selvrens",
+      "CoolStart",
+      "LCD Display",
+      "Stegetermometer",
+      "30 automatiske programmer"
+    ],
+    "rating": 4.7,
+    "link": "https://www.power.dk/hvidevarer/ovn-og-komfur/indbygningsovn/siemens-iq500-hb578abs0s-indbygningsovn/p-1064254/",
+    "store": "Power",
+    "description": "Premium indbygningsovn med pyrolyse og avancerede funktioner til den kræsne kok",
+    "keywords": [
+      "usage-Everyday",
+      "baking-FullSteam",
+      "maintenance-Pyrolyse",
+      "cooking_skill-ProChef",
+      "household_size-Family",
+      "heating_speed-quickheat"
+    ],
+    "tier": "premium"
+  },
+  {
+    "id": "power-ov1002",
+    "name": "Bosch Serie 4 HBA534BS0S",
+    "price": 4499,
+    "image": "https://www.power.dk/images/products/1161524/primary/large",
+    "energy_class": "A",
+    "capacity": 71,
+    "features": [
+      "3D varmluft",
+      "EcoClean Direct",
+      "10 ovnfunktioner",
+      "LED display",
+      "Nem betjening"
+    ],
+    "rating": 4.3,
+    "link": "https://www.power.dk/hvidevarer/ovn-og-komfur/indbygningsovn/bosch-serie-4-hba534bs0s-indbygningsovn/p-1161524/",
+    "store": "Power",
+    "description": "Pålidelig basismodel med god energieffektivitet og brugervenlig betjening",
+    "keywords": [
+      "usage-NotEveryday",
+      "baking-Nosteam",
+      "maintenance-nocleaning",
+      "cooking_skill-AutoChef",
+      "household_size-Single",
+      "heating_speed-MedHeat"
+    ],
+    "tier": "budget"
+  }
+]
