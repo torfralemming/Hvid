@@ -4,14 +4,6 @@ import { supabase } from '../lib/supabase';
 
 const KEYWORD_LABELS: Record<string, string> = {
   household: 'Husstandsstørrelse',
-  distance: 'Afstand til TV',
-  lighting: 'Lysforhold i rummet',
-  usage: 'Primær anvendelse',
-  sport: 'Sport visning',
-  streaming: 'Streaming tjenester',
-  lifespan: 'Forventet levetid',
-  pictureQuality: 'Billedkvalitet',
-  timeOfDay: 'Tidspunkt på dagen',
   washFrequency: 'Vaskefrekvens',
   cleanClothes: 'Rent tøj',
   clothesCare: 'Tøjpleje',
@@ -162,129 +154,12 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
   useEffect(() => {
     async function fetchKeywords() {
       try {
-        setLoading(true);
         const { data, error } = await supabase
           .from('available_keywords')
           .select('category, keyword');
 
         if (error) throw error;
 
-        // Add TV-specific keywords if they don't exist in the database
-        if (productCategory === 'tv') {
-          const tvKeywords = {
-            'distance': ['43-55', '55-65', '65-75', '75+'],
-            'lighting': ['LED', 'QLED', 'OLED', 'QOLED'],
-            'usage': ['SMART TV', 'Analog', '120HZ'],
-            'sport': ['60 HZ', '120 HZ'],
-            'streaming': ['Smart tv', 'Google TV', 'analog'],
-            'lifespan': ['Low Budget', 'Premium', 'High end'],
-            'pictureQuality': ['LED', 'QLED', 'OLED', 'QOLED'],
-            'timeOfDay': ['LED', 'QLED', 'OLED']
-          };
-          
-          // Merge with existing keywords
-          const keywords = { ...data.reduce((acc, curr) => {
-            if (!acc[curr.category]) {
-              acc[curr.category] = [];
-            }
-            acc[curr.category].push(curr.keyword);
-            return acc;
-          }, {} as AvailableKeywords), ...tvKeywords };
-          
-          setAvailableKeywords(keywords);
-        } else {
-          // Group keywords by category for non-TV products
-          const keywords = data.reduce((acc: AvailableKeywords, curr) => {
-            if (!acc[curr.category]) {
-              acc[curr.category] = [];
-            }
-            acc[curr.category].push(curr.keyword);
-            return acc;
-          }, {});
-          
-          setAvailableKeywords(keywords);
-        }
-      } catch (err) {
-        console.error('Error fetching keywords:', err);
-        setError('Der opstod en fejl ved hentning af nøgleord');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    if (isOpen) {
-      fetchKeywords();
-    }
-  }, [isOpen, productCategory]);
-
-  // This effect is used to add TV keywords to the database if they don't exist
-  useEffect(() => {
-    async function addTVKeywordsToDatabase() {
-      if (productCategory !== 'tv') return;
-      
-      try {
-        const tvKeywords = [
-          { category: 'distance', keyword: '43-55' },
-          { category: 'distance', keyword: '55-65' },
-          { category: 'distance', keyword: '65-75' },
-          { category: 'distance', keyword: '75+' },
-          { category: 'lighting', keyword: 'LED' },
-          { category: 'lighting', keyword: 'QLED' },
-          { category: 'lighting', keyword: 'OLED' },
-          { category: 'lighting', keyword: 'QOLED' },
-          { category: 'usage', keyword: 'SMART TV' },
-          { category: 'usage', keyword: 'Analog' },
-          { category: 'usage', keyword: '120HZ' },
-          { category: 'sport', keyword: '60 HZ' },
-          { category: 'sport', keyword: '120 HZ' },
-          { category: 'streaming', keyword: 'Smart tv' },
-          { category: 'streaming', keyword: 'Google TV' },
-          { category: 'streaming', keyword: 'analog' },
-          { category: 'lifespan', keyword: 'Low Budget' },
-          { category: 'lifespan', keyword: 'Premium' },
-          { category: 'lifespan', keyword: 'High end' },
-          { category: 'pictureQuality', keyword: 'LED' },
-          { category: 'pictureQuality', keyword: 'QLED' },
-          { category: 'pictureQuality', keyword: 'OLED' },
-          { category: 'pictureQuality', keyword: 'QOLED' },
-          { category: 'timeOfDay', keyword: 'LED' },
-          { category: 'timeOfDay', keyword: 'QLED' },
-          { category: 'timeOfDay', keyword: 'OLED' }
-        ];
-        
-        // Check if keywords already exist
-        const { data: existingKeywords } = await supabase
-          .from('available_keywords')
-          .select('category, keyword')
-          .in('category', ['distance', 'lighting', 'usage', 'sport', 'streaming', 'lifespan', 'pictureQuality', 'timeOfDay']);
-        
-        // Filter out keywords that already exist
-        const existingKeywordMap = new Set();
-        existingKeywords?.forEach(k => existingKeywordMap.add(`${k.category}-${k.keyword}`));
-        
-        const newKeywords = tvKeywords.filter(k => !existingKeywordMap.has(`${k.category}-${k.keyword}`));
-        
-        if (newKeywords.length > 0) {
-          const { error } = await supabase
-            .from('available_keywords')
-            .insert(newKeywords);
-            
-          if (error) throw error;
-        }
-      } catch (err) {
-        console.error('Error adding TV keywords:', err);
-      }
-    }
-    
-    if (isOpen && productCategory === 'tv') {
-      addTVKeywordsToDatabase();
-    }
-  }, [isOpen, productCategory]);
-
-  // Original fetchKeywords function removed and replaced with the above effects
-  /* useEffect(() => {
-    async function fetchKeywords() {
-      try {
         // Group keywords by category
         const keywords = data.reduce((acc: AvailableKeywords, curr) => {
           if (!acc[curr.category]) {
@@ -306,15 +181,13 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
     if (isOpen) {
       fetchKeywords();
     }
-  }, [isOpen]); */
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   // Filter keyword categories based on product category
   const relevantCategories = Object.entries(availableKeywords).filter(([category]) => {
     switch (productCategory) {
-      case 'tv':
-        return ['distance', 'lighting', 'usage', 'sport', 'streaming', 'lifespan', 'pictureQuality', 'timeOfDay'].includes(category);
       case 'washing_machine':
         return ['household', 'washFrequency', 'cleanClothes', 'clothesCare', 'detergent', 'brand', 'washDuration', 'shirts'].includes(category);
       case 'dishwasher':
