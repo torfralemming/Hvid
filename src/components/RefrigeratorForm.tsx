@@ -3,39 +3,43 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import SignatureDialog from './SignatureDialog';
 
-export type FormData = {
+export type RefrigeratorFormData = {
   keywords: string[];
 };
 
 type FormState = {
   household: string | null;
-  washFrequency: string | null;
-  cleanClothes: string | null;
-  clothesCare: string | null;
-  detergent: string | null;
-  brand: string | null;
-  washDuration: string | null;
-  shirts: string | null;
+  shopping: string | null;
+  storage: string | null;
+  energy: string | null;
+  freezer: string | null;
+  noise: string | null;
+  dispenser: string | null;
+  smart: string | null;
+  design: string | null;
+  size: string | null;
 };
 
-function WashingMachineForm() {
+function RefrigeratorForm() {
   const navigate = useNavigate();
   const [showSignatureDialog, setShowSignatureDialog] = useState(false);
   const [formState, setFormState] = useState<FormState>({
     household: null,
-    washFrequency: null,
-    cleanClothes: null,
-    clothesCare: null,
-    detergent: null,
-    brand: null,
-    washDuration: null,
-    shirts: null,
+    shopping: null,
+    storage: null,
+    energy: null,
+    freezer: null,
+    noise: null,
+    dispenser: null,
+    smart: null,
+    design: null,
+    size: null
   });
 
   const handleOptionSelect = (category: keyof FormState, value: string) => {
     setFormState(prev => ({
       ...prev,
-      [category]: prev[category] === value ? null : value
+      [category]: value
     }));
   };
 
@@ -46,7 +50,7 @@ function WashingMachineForm() {
 
   const handleSignatureSubmit = () => {
     const keywords = Object.values(formState).filter((value): value is string => value !== null);
-    navigate('/washing-machine/recommendations', { state: { keywords } });
+    navigate('/refrigerator/recommendations', { state: { keywords } });
   };
 
   const getResponses = () => {
@@ -76,13 +80,13 @@ function WashingMachineForm() {
         </button>
 
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Find den perfekte vaskemaskine</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Find det perfekte køleskab</h1>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Household Size */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor mange er du/i derhjemme?
+                Hvor mange personer bruger køleskabet dagligt?
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -94,7 +98,7 @@ function WashingMachineForm() {
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  1
+                  1 person
                 </button>
                 <button
                   type="button"
@@ -105,7 +109,7 @@ function WashingMachineForm() {
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  2-3
+                  2-3 personer
                 </button>
                 <button
                   type="button"
@@ -116,7 +120,7 @@ function WashingMachineForm() {
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  4-5
+                  4-5 personer
                 </button>
                 <button
                   type="button"
@@ -127,22 +131,22 @@ function WashingMachineForm() {
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  5 eller flere
+                  5+ personer
                 </button>
               </div>
             </div>
 
-            {/* Wash Frequency */}
+            {/* Shopping Frequency */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor ofte vasker du/i
+                Hvor ofte handler du ind?
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'everyday')}
+                  onClick={() => handleOptionSelect('shopping', 'dailyshopping')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'everyday')
+                    isOptionSelected('shopping', 'dailyshopping')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
@@ -151,20 +155,9 @@ function WashingMachineForm() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'almosteveryday')}
+                  onClick={() => handleOptionSelect('shopping', 'weeklyshopping')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'almosteveryday')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  4-6 gange om ugen
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'weekly')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'weekly')
+                    isOptionSelected('shopping', 'weeklyshopping')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
@@ -173,310 +166,449 @@ function WashingMachineForm() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'onceaweek')}
+                  onClick={() => handleOptionSelect('shopping', 'onceshopping')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'onceaweek')
+                    isOptionSelected('shopping', 'onceshopping')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
                   1 gang om ugen
                 </button>
-              </div>
-            </div>
-
-            {/* Clean Clothes */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor ofte vasker du tøj, du kun har haft på en gang, som ikke er beskidt?
-              </label>
-              <div className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('cleanClothes', 'steamFunc')}
+                  onClick={() => handleOptionSelect('shopping', 'bulkshopping')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('cleanClothes', 'steamFunc')
+                    isOptionSelected('shopping', 'bulkshopping')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Næsten hver gang jeg smider tøj til vask er det ikke beskidt
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('cleanClothes', 'nosteam')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('cleanClothes', 'nosteam')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Aldrig, alt mit tøj er beskidt når jeg vasker det
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('cleanClothes', 'Steamfunc')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('cleanClothes', 'Steamfunc')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det sker af og til
+                  Sjældnere end 1 gang om ugen
                 </button>
               </div>
             </div>
 
-            {/* Clothes Care */}
+            {/* Storage Type */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvad betyder det for dig/jer at tøj holder så længe som muligt?
-              </label>
-              <div className="grid grid-cols-1 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'normaldrum')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'normaldrum')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Vi køber bare noget nyt, når det er slidt
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'honeycomb-luxury')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'honeycomb-luxury')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Jeg har meget dyrt tøj, jeg gerne vil passe på
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'honeycomb-eco')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'honeycomb-eco')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Jeg vil gerne passe på klimaet, derfor skal mit tøj holde længst muligt
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'normaldrum')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'normaldrum')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det har jeg ingen holdning til
-                </button>
-              </div>
-            </div>
-
-            {/* Detergent */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvordan ved du hvor meget sæbe du skal bruge til en vask?
-              </label>
-              <div className="grid grid-cols-1 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('detergent', 'Autodose')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'Autodose')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det ved jeg ikke jeg gætter
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('detergent', 'SelfDose')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'SelfDose')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det betyder ikke noget for mig
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('detergent', 'selfdose')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'selfdose')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Jeg vejer mit tøj hver gang inden jeg vasker det
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('detergent', 'autodose')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'autodose')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det ved jeg ikke, men jeg vil gerne skåne miljøet for overdoseret sæbe
-                </button>
-              </div>
-            </div>
-
-            {/* Brand */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor meget betyder mærket på vaskemaskinen for dig?
+                Hvad opbevarer du mest i dit køleskab?
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('brand', 'AEG')}
+                  onClick={() => handleOptionSelect('storage', 'meatdairy')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'AEG')
+                    isOptionSelected('storage', 'meatdairy')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det skal være AEG
+                  Kød & mejeriprodukter
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('brand', 'Siemens')}
+                  onClick={() => handleOptionSelect('storage', 'vegstorage')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'Siemens')
+                    isOptionSelected('storage', 'vegstorage')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det skal være Siemens
+                  Grøntsager & frugt
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('brand', 'miele')}
+                  onClick={() => handleOptionSelect('storage', 'readymeals')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'miele')
+                    isOptionSelected('storage', 'readymeals')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det skal være Miele
+                  Færdigretter & takeaway
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('brand', 'Electrolux')}
+                  onClick={() => handleOptionSelect('storage', 'drinksnacks')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'Electrolux')
+                    isOptionSelected('storage', 'drinksnacks')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det skal være Electrolux
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('brand', 'Anybrand')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'Anybrand')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det betyder ikke noget hvilket mærke det er
+                  Drikkevarer & snacks
                 </button>
               </div>
             </div>
 
-            {/* Wash Duration */}
+            {/* Energy Importance */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor lang tid må en vask tage?
+                Hvor vigtig er energiforbruget for dig?
               </label>
               <div className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'PowerWash')}
+                  onClick={() => handleOptionSelect('energy', 'energysaving')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'PowerWash')
+                    isOptionSelected('energy', 'energysaving')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Den skal vaske hurtigt, men stadig økonomisk (1 time)
+                  Det skal være så energieffektivt som muligt
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'Speedwash')}
+                  onClick={() => handleOptionSelect('energy', 'performance')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'Speedwash')
+                    isOptionSelected('energy', 'performance')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Den skal bare vaske hurtigt prisen er ligemeget (1 time)
+                  Det må godt koste lidt ekstra i strøm, hvis det er bedre
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'ecowash')}
+                  onClick={() => handleOptionSelect('energy', 'normalenergy')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'ecowash')
+                    isOptionSelected('energy', 'normalenergy')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Vaskens længde har ingen betydning (1-4 timer)
+                  Jeg tænker ikke så meget over strømforbrug
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'ecowash')}
+                  onClick={() => handleOptionSelect('energy', 'lowprice')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'ecowash')
+                    isOptionSelected('energy', 'lowprice')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Den skal bare være billig i drift, så er vaskens længde ikke vigtig (2.5-4 timer)
+                  Jeg vil have det billigste køleskab, uanset energiforbrug
                 </button>
               </div>
             </div>
 
-            {/* Shirts */}
+            {/* Freezer Need */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Ønsker du at bruge din vaskemaskine til at stryge dine skjorter?
+                Har du brug for en fryser i dit køleskab?
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('shirts', 'Steam')}
+                  onClick={() => handleOptionSelect('freezer', 'bigfreezer')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('shirts', 'Steam')
+                    isOptionSelected('freezer', 'bigfreezer')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Ja
+                  Ja, en stor fryser er vigtig
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('shirts', 'nosteam')}
+                  onClick={() => handleOptionSelect('freezer', 'smallfreezer')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('shirts', 'nosteam')
+                    isOptionSelected('freezer', 'smallfreezer')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Nej
+                  Ja, men en lille fryser er nok
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('freezer', 'nofreezer')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('freezer', 'nofreezer')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Nej, jeg har en separat fryser
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('freezer', 'unsurefreezer')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('freezer', 'unsurefreezer')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Jeg ved ikke, hvad jeg har brug for
+                </button>
+              </div>
+            </div>
+
+            {/* Noise Level */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Hvor meget betyder støjniveauet for dig?
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('noise', 'quiet')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('noise', 'quiet')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Det skal være så lydløst som muligt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('noise', 'normalnoise')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('noise', 'normalnoise')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Det må godt larme lidt, hvis det er billigt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('noise', 'noisefree')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('noise', 'noisefree')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Jeg lægger ikke mærke til støj
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('noise', 'loudok')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('noise', 'loudok')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Det står i en kælder/garage, så støj er ligegyldigt
+                </button>
+              </div>
+            </div>
+
+            {/* Water/Ice Dispenser */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Ønsker du en køleskabsdør med vand- og isterningefunktion?
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('dispenser', 'waterice')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('dispenser', 'waterice')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Ja, vand- og isdispenser er vigtigt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('dispenser', 'wateronly')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('dispenser', 'wateronly')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Ja, kun en vanddispenser
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('dispenser', 'noicedispenser')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('dispenser', 'noicedispenser')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Nej, kun isbakker er fint
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('dispenser', 'standarddoor')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('dispenser', 'standarddoor')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Nej, det er ikke nødvendigt
+                </button>
+              </div>
+            </div>
+
+            {/* Smart Features */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Skal dit køleskab kunne styres via en app?
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('smart', 'smartcontrol')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('smart', 'smartcontrol')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Ja, jeg vil kunne justere temperatur via mobilen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('smart', 'smartscreen')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('smart', 'smartscreen')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Ja, jeg vil have en skærm på døren
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('smart', 'nosmart')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('smart', 'nosmart')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Nej, det behøver ikke være smart
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('smart', 'unsuretech')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('smart', 'unsuretech')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Jeg ved ikke, om jeg vil bruge det
+                </button>
+              </div>
+            </div>
+
+            {/* Design */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Hvor vigtigt er designet for dig?
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('design', 'premiumdesign')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('design', 'premiumdesign')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Det skal være rustfrit stål eller sort
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('design', 'integrated')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('design', 'integrated')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Det skal matche mit køkken (f.eks. integreret)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('design', 'standardwhite')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('design', 'standardwhite')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Hvidt køleskab er fint for mig
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('design', 'anydesign')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('design', 'anydesign')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Jeg går ikke op i udseendet
+                </button>
+              </div>
+            </div>
+
+            {/* Size */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Hvor meget plads har du til dit køleskab?
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('size', 'slimfit')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('size', 'slimfit')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Max 60 cm bredde (smalt køleskab)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('size', 'standardfit')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('size', 'standardfit')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  60-70 cm bredde (standardstørrelse)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('size', 'largefit')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('size', 'largefit')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Over 70 cm bredde (stort køleskab)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('size', 'unsurefit')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('size', 'unsurefit')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Jeg ved ikke, hvor meget plads jeg har
                 </button>
               </div>
             </div>
@@ -490,17 +622,17 @@ function WashingMachineForm() {
             </button>
           </form>
         </div>
-      </div>
 
-      <SignatureDialog
-        isOpen={showSignatureDialog}
-        onClose={() => setShowSignatureDialog(false)}
-        onSubmit={handleSignatureSubmit}
-        category="washing_machine"
-        responses={getResponses()}
-      />
+        <SignatureDialog
+          isOpen={showSignatureDialog}
+          onClose={() => setShowSignatureDialog(false)}
+          onSubmit={handleSignatureSubmit}
+          category="refrigerator"
+          responses={getResponses()}
+        />
+      </div>
     </div>
   );
 }
 
-export default WashingMachineForm;
+export default RefrigeratorForm;

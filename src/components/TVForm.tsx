@@ -3,39 +3,39 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import SignatureDialog from './SignatureDialog';
 
-export type FormData = {
+export type TVFormData = {
   keywords: string[];
 };
 
 type FormState = {
-  household: string | null;
-  washFrequency: string | null;
-  cleanClothes: string | null;
-  clothesCare: string | null;
-  detergent: string | null;
-  brand: string | null;
-  washDuration: string | null;
-  shirts: string | null;
+  lighting: string | null;
+  distance: string | null;
+  usage: string | null;
+  sport: string | null;
+  streaming: string | null;
+  lifespan: string | null;
+  pictureQuality: string | null;
+  timeOfDay: string | null;
 };
 
-function WashingMachineForm() {
+function TVForm() {
   const navigate = useNavigate();
   const [showSignatureDialog, setShowSignatureDialog] = useState(false);
   const [formState, setFormState] = useState<FormState>({
-    household: null,
-    washFrequency: null,
-    cleanClothes: null,
-    clothesCare: null,
-    detergent: null,
-    brand: null,
-    washDuration: null,
-    shirts: null,
+    lighting: null,
+    distance: null,
+    usage: null,
+    sport: null,
+    streaming: null,
+    lifespan: null,
+    pictureQuality: null,
+    timeOfDay: null,
   });
 
   const handleOptionSelect = (category: keyof FormState, value: string) => {
     setFormState(prev => ({
       ...prev,
-      [category]: prev[category] === value ? null : value
+      [category]: value
     }));
   };
 
@@ -46,7 +46,7 @@ function WashingMachineForm() {
 
   const handleSignatureSubmit = () => {
     const keywords = Object.values(formState).filter((value): value is string => value !== null);
-    navigate('/washing-machine/recommendations', { state: { keywords } });
+    navigate('/tv/recommendations', { state: { keywords } });
   };
 
   const getResponses = () => {
@@ -76,407 +76,418 @@ function WashingMachineForm() {
         </button>
 
         <div className="bg-white rounded-xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Find den perfekte vaskemaskine</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Find det perfekte TV</h1>
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Household Size */}
+            {/* Lighting Conditions */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor mange er du/i derhjemme?
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('household', 'single')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('household', 'single')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  1
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('household', 'couple')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('household', 'couple')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  2-3
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('household', 'family')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('household', 'family')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  4-5
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('household', 'largefamily')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('household', 'largefamily')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  5 eller flere
-                </button>
-              </div>
-            </div>
-
-            {/* Wash Frequency */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor ofte vasker du/i
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'everyday')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'everyday')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Hver dag
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'almosteveryday')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'almosteveryday')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  4-6 gange om ugen
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'weekly')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'weekly')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  2-3 gange om ugen
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('washFrequency', 'onceaweek')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('washFrequency', 'onceaweek')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  1 gang om ugen
-                </button>
-              </div>
-            </div>
-
-            {/* Clean Clothes */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor ofte vasker du tøj, du kun har haft på en gang, som ikke er beskidt?
+                Hvordan er lysindfaldet i din stue?
               </label>
               <div className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('cleanClothes', 'steamFunc')}
+                  onClick={() => handleOptionSelect('lighting', 'LED')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('cleanClothes', 'steamFunc')
+                    isOptionSelected('lighting', 'LED')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Næsten hver gang jeg smider tøj til vask er det ikke beskidt
+                  Meget lyst
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('cleanClothes', 'nosteam')}
+                  onClick={() => handleOptionSelect('lighting', 'QLED TV')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('cleanClothes', 'nosteam')
+                    isOptionSelected('lighting', 'QLED TV')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Aldrig, alt mit tøj er beskidt når jeg vasker det
+                  Moderat lys
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('cleanClothes', 'Steamfunc')}
+                  onClick={() => handleOptionSelect('lighting', 'OLED')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('cleanClothes', 'Steamfunc')
+                    isOptionSelected('lighting', 'OLED')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det sker af og til
+                  Mørkt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('lighting', 'QLED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('lighting', 'QLED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Varierer
                 </button>
               </div>
             </div>
 
-            {/* Clothes Care */}
+            {/* Viewing Distance */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvad betyder det for dig/jer at tøj holder så længe som muligt?
+                Hvor mange meter sidder du fra TV'et?
               </label>
               <div className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'normaldrum')}
+                  onClick={() => handleOptionSelect('distance', '43-55')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'normaldrum')
+                    isOptionSelected('distance', '43-55')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Vi køber bare noget nyt, når det er slidt
+                  Under 2 meter
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'honeycomb-luxury')}
+                  onClick={() => handleOptionSelect('distance', '55-65')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'honeycomb-luxury')
+                    isOptionSelected('distance', '55-65')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Jeg har meget dyrt tøj, jeg gerne vil passe på
+                  2-3 meter
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'honeycomb-eco')}
+                  onClick={() => handleOptionSelect('distance', '65-75')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'honeycomb-eco')
+                    isOptionSelected('distance', '65-75')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Jeg vil gerne passe på klimaet, derfor skal mit tøj holde længst muligt
+                  3-4 meter
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('clothesCare', 'normaldrum')}
+                  onClick={() => handleOptionSelect('distance', '75+')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('clothesCare', 'normaldrum')
+                    isOptionSelected('distance', '75+')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det har jeg ingen holdning til
+                  Over 4 meter
                 </button>
               </div>
             </div>
 
-            {/* Detergent */}
+            {/* Primary Usage */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvordan ved du hvor meget sæbe du skal bruge til en vask?
+                Hvad bruges dit TV mest til?
               </label>
               <div className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('detergent', 'Autodose')}
+                  onClick={() => handleOptionSelect('usage', 'SMART TV')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'Autodose')
+                    isOptionSelected('usage', 'SMART TV')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det ved jeg ikke jeg gætter
+                  Streaming
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('detergent', 'SelfDose')}
+                  onClick={() => handleOptionSelect('usage', 'Analog')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'SelfDose')
+                    isOptionSelected('usage', 'Analog')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det betyder ikke noget for mig
+                  TV-kanaler/nyheder
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('detergent', 'selfdose')}
+                  onClick={() => handleOptionSelect('usage', '120HZ')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'selfdose')
+                    isOptionSelected('usage', '120HZ')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Jeg vejer mit tøj hver gang inden jeg vasker det
+                  Spil/konsol
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('detergent', 'autodose')}
+                  onClick={() => handleOptionSelect('usage', 'SMART TV')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('detergent', 'autodose')
+                    isOptionSelected('usage', 'SMART TV')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Det ved jeg ikke, men jeg vil gerne skåne miljøet for overdoseret sæbe
+                  YouTube/baggrundsunderholdning
                 </button>
               </div>
             </div>
 
-            {/* Brand */}
+            {/* Sports Viewing */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor meget betyder mærket på vaskemaskinen for dig?
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('brand', 'AEG')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'AEG')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det skal være AEG
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('brand', 'Siemens')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'Siemens')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det skal være Siemens
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('brand', 'miele')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'miele')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det skal være Miele
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('brand', 'Electrolux')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'Electrolux')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det skal være Electrolux
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleOptionSelect('brand', 'Anybrand')}
-                  className={`p-3 rounded-lg border ${
-                    isOptionSelected('brand', 'Anybrand')
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-blue-300'
-                  }`}
-                >
-                  Det betyder ikke noget hvilket mærke det er
-                </button>
-              </div>
-            </div>
-
-            {/* Wash Duration */}
-            <div>
-              <label className="block text-lg font-medium text-gray-700 mb-3">
-                Hvor lang tid må en vask tage?
+                Skal du se sport på TV'et?
               </label>
               <div className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'PowerWash')}
+                  onClick={() => handleOptionSelect('sport', '120 HZ')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'PowerWash')
+                    isOptionSelected('sport', '120 HZ')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Den skal vaske hurtigt, men stadig økonomisk (1 time)
+                  Ja, ofte
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'Speedwash')}
+                  onClick={() => handleOptionSelect('sport', '120 HZ')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'Speedwash')
+                    isOptionSelected('sport', '120 HZ')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Den skal bare vaske hurtigt prisen er ligemeget (1 time)
+                  Ja, indimellem
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'ecowash')}
+                  onClick={() => handleOptionSelect('sport', '60 HZ')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'ecowash')
+                    isOptionSelected('sport', '60 HZ')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Vaskens længde har ingen betydning (1-4 timer)
+                  Ja, men går ikke op i om billedet er perfekt
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('washDuration', 'ecowash')}
+                  onClick={() => handleOptionSelect('sport', '60 HZ')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('washDuration', 'ecowash')
+                    isOptionSelected('sport', '60 HZ')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Den skal bare være billig i drift, så er vaskens længde ikke vigtig (2.5-4 timer)
+                  Nej / Kun andre i hjemmet
                 </button>
               </div>
             </div>
 
-            {/* Shirts */}
+            {/* Streaming Services */}
             <div>
               <label className="block text-lg font-medium text-gray-700 mb-3">
-                Ønsker du at bruge din vaskemaskine til at stryge dine skjorter?
+                Hvilke streamingtjenester bruger du mest?
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('shirts', 'Steam')}
+                  onClick={() => handleOptionSelect('streaming', 'Smart tv')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('shirts', 'Steam')
+                    isOptionSelected('streaming', 'Smart tv')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Ja
+                  Netflix/Disney+
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleOptionSelect('shirts', 'nosteam')}
+                  onClick={() => handleOptionSelect('streaming', 'Google TV')}
                   className={`p-3 rounded-lg border ${
-                    isOptionSelected('shirts', 'nosteam')
+                    isOptionSelected('streaming', 'Google TV')
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-300 hover:border-blue-300'
                   }`}
                 >
-                  Nej
+                  HBO/Viaplay
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('streaming', 'smart tv')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('streaming', 'smart tv')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  YouTube
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('streaming', 'analog')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('streaming', 'analog')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  TV-kanaler
+                </button>
+              </div>
+            </div>
+
+            {/* Expected Lifespan */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Hvor længe forventer du, at dit TV skal holde?
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('lifespan', 'Low Budget')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('lifespan', 'Low Budget')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  3-5 år
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('lifespan', 'Premium')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('lifespan', 'Premium')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  5-7 år
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('lifespan', 'High end')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('lifespan', 'High end')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  7-10 år / så længe det virker
+                </button>
+              </div>
+            </div>
+
+            {/* Picture Quality Importance */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Hvor vigtig er billedkvaliteten for dig?
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('pictureQuality', 'QOLED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('pictureQuality', 'QOLED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Meget vigtig
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('pictureQuality', 'OLED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('pictureQuality', 'OLED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Vigtig men brugervenlighed også vigtigt
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('pictureQuality', 'QLED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('pictureQuality', 'QLED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Ikke det vigtigste
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('pictureQuality', 'LED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('pictureQuality', 'LED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Ser ikke forskel
+                </button>
+              </div>
+            </div>
+
+            {/* Time of Day Usage */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                Hvornår på dagen bruger du mest dit TV?
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('timeOfDay', 'OLED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('timeOfDay', 'OLED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Om aftenen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('timeOfDay', 'QLED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('timeOfDay', 'QLED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Weekenden
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('timeOfDay', 'QLED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('timeOfDay', 'QLED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Lidt hele dagen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('timeOfDay', 'LED')}
+                  className={`p-3 rounded-lg border ${
+                    isOptionSelected('timeOfDay', 'LED')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }`}
+                >
+                  Baggrund i dagtimerne
                 </button>
               </div>
             </div>
@@ -490,17 +501,17 @@ function WashingMachineForm() {
             </button>
           </form>
         </div>
-      </div>
 
-      <SignatureDialog
-        isOpen={showSignatureDialog}
-        onClose={() => setShowSignatureDialog(false)}
-        onSubmit={handleSignatureSubmit}
-        category="washing_machine"
-        responses={getResponses()}
-      />
+        <SignatureDialog
+          isOpen={showSignatureDialog}
+          onClose={() => setShowSignatureDialog(false)}
+          onSubmit={handleSignatureSubmit}
+          category="tv"
+          responses={getResponses()}
+        />
+      </div>
     </div>
   );
 }
 
-export default WashingMachineForm;
+export default TVForm;
