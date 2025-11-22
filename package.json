@@ -10,14 +10,12 @@
     "preview": "vite preview",
     "scrape": "tsx scripts/scrape-products.ts",
     "update-washing-machines": "tsx scripts/update-washing-machines.ts",
-    "update-all-products": "tsx scripts/update-all-products.ts"
+    "update-all-products": "tsx scripts/update-all-products.ts",
+    "scrape-images": "tsx scripts/scrape-images.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.7",
-    "chart.js": "^4.4.1",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
-    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.22.3"
   },
@@ -25,7 +23,7 @@
     "@eslint/js": "^9.9.1",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.18",
     "dotenv": "^16.5.0",
     "eslint": "^9.9.1",
@@ -37,6 +35,6 @@
     "tsx": "^4.7.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2"
+    "vite": "^5.4.21"
   }
 }

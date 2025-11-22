@@ -1,0 +1,92 @@
+[
+  {
+    "id": "power-wm1001",
+    "name": "Samsung WW90T534DAW",
+    "price": 4999,
+    "image": "https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?w=500&q=80",
+    "energy_class": "A",
+    "capacity": 9,
+    "rpm": 1400,
+    "features": [
+      "EcoBubble™ teknologi",
+      "Smart Control+",
+      "Digital Inverter Motor",
+      "QuickWash"
+    ],
+    "rating": 4.5,
+    "link": "https://www.power.dk/hvidevarer/toejvask/frontbetjente-vaskemaskiner/samsung-ww90t534daw-vaskemaskine/p-1155653/",
+    "store": "Power",
+    "description": "En pålidelig vaskemaskine med god energieffektivitet og smart teknologi",
+    "keywords": [
+      "household-family",
+      "washFrequency-almosteveryday",
+      "cleanClothes-steamFunc",
+      "clothesCare-honeycomb-luxury",
+      "detergent-Autodose",
+      "brand-Anybrand",
+      "washDuration-PowerWash",
+      "shirts-Steam"
+    ],
+    "tier": "budget"
+  },
+  {
+    "id": "power-wm1002",
+    "name": "LG F4WV308S6E",
+    "price": 3999,
+    "image": "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=500&q=80",
+    "energy_class": "A",
+    "capacity": 8,
+    "rpm": 1400,
+    "features": [
+      "AI DD™ teknologi",
+      "6 Motion Direct Drive",
+      "Steam™",
+      "TurboWash™"
+    ],
+    "rating": 4.3,
+    "link": "https://www.power.dk/hvidevarer/toejvask/frontbetjente-vaskemaskiner/lg-f4wv308s6e-vaskemaskine/p-1198754/",
+    "store": "Power",
+    "description": "Smart vaskemaskine med innovativ teknologi og god ydeevne",
+    "keywords": [
+      "household-couple",
+      "washFrequency-weekly",
+      "cleanClothes-nosteam",
+      "clothesCare-normaldrum",
+      "detergent-SelfDose",
+      "brand-Anybrand",
+      "washDuration-ecowash",
+      "shirts-nosteam"
+    ],
+    "tier": "budget"
+  },
+  {
+    "id": "power-wm1003",
+    "name": "Miele WWV980 WPS",
+    "price": 12999,
+    "image": "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=500&q=80",
+    "energy_class": "A",
+    "capacity": 9,
+    "rpm": 1600,
+    "features": [
+      "TwinDos",
+      "PowerWash",
+      "SteamCare",
+      "SingleWash"
+    ],
+    "rating": 4.9,
+    "link": "https://www.power.dk/hvidevarer/toejvask/frontbetjente-vaskemaskiner/miele-wwv980-wps-vaskemaskine/p-1190287/",
+    "store": "Power",
+    "description": "Topmodellen fra Miele med alle tænkelige funktioner og højeste kvalitet",
+    "keywords": [
+      "household-largefamily",
+      "washFrequency-everyday",
+      "cleanClothes-Steamfunc",
+      "clothesCare-honeycomb-luxury",
+      "detergent-Autodose",
+      "brand-miele",
+      "washDuration-ecowash",
+      "shirts-Steam"
+    ],
+    "tier": "premium"
+  }
+]
