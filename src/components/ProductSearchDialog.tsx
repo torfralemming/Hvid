@@ -260,6 +260,124 @@ function generateKeywords(product: PowerProduct): string[] {
   const keywords: string[] = [];
   const productType = determineProductType(product);
   
+  // Get keywords from available_keywords table for this product type
+  return generateKeywordsFromDatabase(product, productType);
+}
+
+async function generateKeywordsFromDatabase(product: PowerProduct, productType: string): Promise<string[]> {
+  try {
+    // Fetch available keywords for this product type from the database
+    const { data: availableKeywords, error } = await supabase
+      .from('available_keywords')
+      .select('category, keyword');
+
+    if (error) {
+      console.error('Error fetching keywords:', error);
+      return generateKeywordsLegacy(product, productType);
+    }
+
+    // Group keywords by category
+    const keywordsByCategory: Record<string, string[]> = {};
+    availableKeywords.forEach(kw => {
+      if (!keywordsByCategory[kw.category]) {
+        keywordsByCategory[kw.category] = [];
+      }
+      keywordsByCategory[kw.category].push(kw.keyword);
+    });
+
+    return generateSmartKeywords(product, productType, keywordsByCategory);
+  } catch (err) {
+    console.error('Error in generateKeywordsFromDatabase:', err);
+    return generateKeywordsLegacy(product, productType);
+  }
+}
+
+function generateSmartKeywords(product: PowerProduct, productType: string, keywordsByCategory: Record<string, string[]>): string[] {
+  const keywords: string[] = [];
+
+  // Smart keyword generation based on product analysis and available keywords
+  Object.entries(keywordsByCategory).forEach(([category, availableKeywords]) => {
+    const selectedKeyword = selectBestKeyword(product, productType, category, availableKeywords);
+    if (selectedKeyword) {
+      keywords.push(selectedKeyword);
+    }
+  });
+
+  return [...new Set(keywords)]; // Remove duplicates
+}
+
+function selectBestKeyword(product: PowerProduct, productType: string, category: string, availableKeywords: string[]): string | null {
+  const searchText = [
+    product.name || '',
+    product.shortDescription || '',
+    product.specifications?.map(s => `${s.name} ${s.value}`).join(' ') || '',
+    product.bulletPoints?.join(' ') || ''
+  ].join(' ').toLowerCase();
+
+  // Category-specific logic
+  switch (category) {
+    case 'household':
+      const capacity = extractCapacity(product);
+      if (capacity <= 7) return 'single';
+      if (capacity <= 9) return 'couple';
+      if (capacity <= 12) return 'family';
+      return 'largefamily';
+
+    case 'brand':
+      const brand = product.brand?.name?.toLowerCase();
+      const matchingBrand = availableKeywords.find(kw => 
+        kw.toLowerCase() === brand || searchText.includes(kw.toLowerCase())
+      );
+      return matchingBrand || 'Anybrand';
+
+    case 'tier':
+    case 'lifespan':
+      if (product.price < 5000) return availableKeywords.find(kw => kw.includes('budget') || kw.includes('Budget')) || availableKeywords[0];
+      if (product.price > 10000) return availableKeywords.find(kw => kw.includes('premium') || kw.includes('high') || kw.includes('Premium')) || availableKeywords[availableKeywords.length - 1];
+      return availableKeywords.find(kw => kw.includes('mid') || kw.includes('medium')) || availableKeywords[Math.floor(availableKeywords.length / 2)];
+
+    case 'energy':
+      const energyClass = product.specifications?.find(spec => 
+        spec.name.toLowerCase().includes('energi')
+      )?.value || 'D';
+      if (energyClass <= 'B') return availableKeywords.find(kw => kw.includes('saving')) || availableKeywords[0];
+      return availableKeywords.find(kw => kw.includes('normal')) || availableKeywords[1];
+
+    case 'smart':
+      const hasSmart = searchText.includes('smart') || searchText.includes('wifi') || searchText.includes('app');
+      return hasSmart ? 
+        (availableKeywords.find(kw => kw.includes('smart')) || availableKeywords[0]) :
+        (availableKeywords.find(kw => kw.includes('no')) || availableKeywords[availableKeywords.length - 1]);
+
+    case 'noise':
+      const noiseLevel = product.specifications?.find(spec => 
+        spec.name.toLowerCase().includes('støj') || spec.name.toLowerCase().includes('noise')
+      );
+      const noise = noiseLevel ? parseInt(noiseLevel.value.match(/\d+/)?.[0] || '45') : 45;
+      return noise <= 42 ? 
+        (availableKeywords.find(kw => kw.includes('quiet')) || availableKeywords[0]) :
+        (availableKeywords.find(kw => kw.includes('normal')) || availableKeywords[1]);
+
+    default:
+      // For other categories, try to find the best match based on product features
+      const bestMatch = availableKeywords.find(keyword => {
+        const keywordLower = keyword.toLowerCase();
+        return searchText.includes(keywordLower) || 
+               product.specifications?.some(spec => 
+                 spec.value.toLowerCase().includes(keywordLower)
+               ) ||
+               product.bulletPoints?.some(point => 
+                 point.toLowerCase().includes(keywordLower)
+               );
+      });
+      
+      return bestMatch || availableKeywords[0]; // Default to first available keyword
+  }
+}
+
+function generateKeywordsLegacy(product: PowerProduct, productType: string): string[] {
+  const keywords: string[] = [];
+  
   // Generate keywords based on product type and form questions
   switch (productType) {
     case 'washing_machine':

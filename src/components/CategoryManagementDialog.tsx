@@ -562,16 +562,36 @@ function CategoryManagementDialog({ isOpen, onClose }: CategoryManagementDialogP
     }
 
     try {
+      setLoading(true);
+      setError(null);
+
+      // Delete from product_categories table
       const { error } = await supabase
         .from('product_categories')
         .delete()
         .eq('id', categoryId);
 
       if (error) throw error;
+
+      // Delete associated keywords
+      const { error: keywordError } = await supabase
+        .from('available_keywords')
+        .delete()
+        .eq('category', categoryId);
+
+      if (keywordError) {
+        console.warn('Could not delete keywords:', keywordError);
+      }
+
+      // Note: We don't automatically drop the table as it might contain data
+      console.log(`Category ${categoryId} deleted. Consider manually dropping table if no longer needed.`);
+
       await fetchCategories();
     } catch (err) {
       console.error('Error deleting category:', err);
       setError('Der opstod en fejl ved sletning af kategori');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -587,72 +607,532 @@ function CategoryManagementDialog({ isOpen, onClose }: CategoryManagementDialogP
 
       const categoryData = {
         id: formData.name.toLowerCase().replace(/\s+/g, '_'),
-        name: formData.displayName
+        name: formData.displayName,
+        questions: formData.questions,
+        icon: formData.icon
       };
 
       if (view === 'create') {
+        // Check if category with this ID already exists
+        const { data: existingCategories, error: checkError } = await supabase
+          .from('product_categories')
+          .select('id')
+          .limit(1)
+          .eq('id', categoryData.id);
+
+        if (checkError) {
+          throw checkError;
+        }
+
+        if (existingCategories && existingCategories.length > 0) {
+          setError(`En kategori med det tekniske navn "${categoryData.id}" eksisterer allerede. Vælg venligst et andet navn.`);
+          return;
+        }
+
+        // Create the category
         const { error } = await supabase
           .from('product_categories')
           .insert([categoryData]);
 
         if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('product_categories')
-          .update({ name: formData.displayName })
-          .eq('id', formData.id);
 
-        if (error) throw error;
-
-        // Update keywords in available_keywords table
+        // Add keywords to available_keywords
         await updateAvailableKeywords();
 
-        // Update product keywords if they changed
+        // Create form and recommendation components
+        await createFormComponent(categoryData.id, formData.displayName, formData.questions);
+        await createRecommendationComponent(categoryData.id, formData.displayName);
+
+        // Update App.tsx with new routes
+        await updateAppRoutes(categoryData.id, formData.displayName);
+
+        alert(`Kategori "${formData.displayName}" oprettet succesfuldt!\n- Ny tabel "${categoryData.id}" er oprettet\n- ${getTotalKeywords()} nøgleord er tilføjet\n- Produkter vil automatisk få genereret nøgleord`);
+      } else {
+        const { error: updateError } = await supabase
+          .from('product_categories')
+          .update({ 
+            name: formData.displayName,
+            questions: formData.questions,
+            icon: formData.icon
+          })
+          .eq('id', formData.id);
+
+        if (updateError) throw updateError;
+
+        await updateAvailableKeywords();
         await updateProductKeywords();
+
+        alert(`Kategori "${formData.displayName}" opdateret succesfuldt!\n- Nøgleord er opdateret\n- Eksisterende produkter er opdateret`);
       }
 
-      alert(`Kategori ${view === 'create' ? 'oprettet' : 'opdateret'} succesfuldt! Nøgleord er blevet opdateret.`);
-      
       await fetchCategories();
       setView('list');
     } catch (err) {
       console.error('Error saving category:', err);
-      setError('Der opstod en fejl ved gemning af kategori');
+      setError(`Der opstod en fejl ved gemning af kategori: ${err instanceof Error ? err.message : 'Ukendt fejl'}`);
     } finally {
       setLoading(false);
     }
   };
 
+  const createFormComponent = async (categoryId: string, displayName: string, questions: Question[]) => {
+    const componentName = categoryId.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join('');
+    
+    const formContent = generateFormComponent(componentName, displayName, questions);
+    
+    // In a real implementation, you would save this to the file system
+    // For now, we'll log it so you can manually create the file
+    console.log(`Create file: src/components/${componentName}Form.tsx`);
+    console.log(formContent);
+  };
+
+  const createRecommendationComponent = async (categoryId: string, displayName: string) => {
+    const componentName = categoryId.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join('');
+    
+    const recommendationContent = generateRecommendationComponent(componentName, displayName);
+    
+    // In a real implementation, you would save this to the file system
+    console.log(`Create file: src/components/${componentName}Recommendations.tsx`);
+    console.log(recommendationContent);
+  };
+
+  const updateAppRoutes = async (categoryId: string, displayName: string) => {
+    const componentName = categoryId.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join('');
+    
+    console.log(`Add to App.tsx imports:`);
+    console.log(`import ${componentName}Form from './components/${componentName}Form.tsx';`);
+    console.log(`import ${componentName}Recommendations from './components/${componentName}Recommendations.tsx';`);
+    console.log(`Add to categories array: { id: '${categoryId}', name: '${displayName}', icon: '${formData.icon}' }`);
+    console.log(`Add routes: <Route path="/${categoryId}" element={<${componentName}Form />} />`);
+    console.log(`<Route path="/${categoryId}/recommendations" element={<${componentName}Recommendations />} />`);
+  };
+
+  const generateFormComponent = (componentName: string, displayName: string, questions: Question[]) => {
+    return `import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import SignatureDialog from './SignatureDialog';
+
+export type ${componentName}FormData = {
+  keywords: string[];
+};
+
+type FormState = {
+${questions.map(q => `  ${q.key}: string | null;`).join('\n')}
+};
+
+function ${componentName}Form() {
+  const navigate = useNavigate();
+  const [showSignatureDialog, setShowSignatureDialog] = useState(false);
+  const [formState, setFormState] = useState<FormState>({
+${questions.map(q => `    ${q.key}: null,`).join('\n')}
+  });
+
+  const handleOptionSelect = (category: keyof FormState, value: string) => {
+    setFormState(prev => ({
+      ...prev,
+      [category]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowSignatureDialog(true);
+  };
+
+  const handleSignatureSubmit = () => {
+    const keywords = Object.values(formState).filter((value): value is string => value !== null);
+    navigate('/${componentName.toLowerCase()}/recommendations', { state: { keywords } });
+  };
+
+  const getResponses = () => {
+    return Object.entries(formState)
+      .filter(([_, value]) => value !== null)
+      .map(([question, answer]) => ({
+        question,
+        answer
+      }));
+  };
+
+  const isOptionSelected = (category: keyof FormState, value: string) => {
+    return formState[category] === value;
+  };
+
+  const isFormValid = Object.values(formState).every(value => value !== null);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
+      <div className="max-w-2xl mx-auto px-4">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center text-blue-600 hover:text-blue-800 mb-8"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Tilbage til kategorier
+        </button>
+
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Find ${displayName.toLowerCase()}</h1>
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+${questions.map((question, index) => `
+            {/* ${question.label} */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-3">
+                ${question.label}
+              </label>
+              <div className="grid grid-cols-${question.options.length <= 2 ? '2' : question.options.length <= 4 ? '2' : '1'} gap-3">
+${question.options.map(option => `                <button
+                  type="button"
+                  onClick={() => handleOptionSelect('${question.key}', '${option.value}')}
+                  className={\`p-3 rounded-lg border \${
+                    isOptionSelected('${question.key}', '${option.value}')
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-blue-300'
+                  }\`}
+                >
+                  ${option.label}
+                </button>`).join('\n')}
+              </div>
+            </div>`).join('\n')}
+
+            <button
+              type="submit"
+              disabled={!isFormValid}
+              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              Find anbefalinger
+            </button>
+          </form>
+        </div>
+
+        <SignatureDialog
+          isOpen={showSignatureDialog}
+          onClose={() => setShowSignatureDialog(false)}
+          onSubmit={handleSignatureSubmit}
+          category="${componentName.toLowerCase()}"
+          responses={getResponses()}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default ${componentName}Form;`;
+  };
+
+  const generateRecommendationComponent = (componentName: string, displayName: string) => {
+    return `import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Star, ExternalLink } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import type { ${componentName}FormData } from './${componentName}Form';
+
+type ${componentName} = {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  energy_class: string;
+  capacity: number;
+  features: string[];
+  rating: number;
+  link: string;
+  store: string;
+  description: string;
+  keywords: string[];
+  tier: 'budget' | 'mid' | 'premium';
+  product_type: string;
+};
+
+type ${componentName}WithMatches = ${componentName} & {
+  matchCount: number;
+};
+
+function ${componentName}Recommendations() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const formData = location.state as ${componentName}FormData;
+  const [recommendations, setRecommendations] = useState<${componentName}WithMatches[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchRecommendations() {
+      if (!formData?.keywords) {
+        setError('Ingen søgekriterier fundet');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data: products, error } = await supabase
+          .from('all_products')
+          .select('*')
+          .eq('product_type', '${componentName.toLowerCase()}');
+
+        if (error) {
+          throw error;
+        }
+
+        const scoredProducts = (products as ${componentName}[])
+          .map(product => {
+            const matchingKeywords = product.keywords.filter(k => formData.keywords.includes(k));
+            return {
+              ...product,
+              matchCount: matchingKeywords.length
+            };
+          })
+          .filter(({ matchCount }) => matchCount > 0);
+
+        // Sort by match count first, then by price within each tier
+        const budgetProducts = scoredProducts
+          .filter(m => m.tier === 'budget')
+          .sort((a, b) => b.matchCount - a.matchCount || a.price - b.price);
+        
+        const midProducts = scoredProducts
+          .filter(m => m.tier === 'mid')
+          .sort((a, b) => b.matchCount - a.matchCount || a.price - b.price);
+        
+        const premiumProducts = scoredProducts
+          .filter(m => m.tier === 'premium')
+          .sort((a, b) => b.matchCount - a.matchCount || a.price - b.price);
+
+        const recommendations = [
+          budgetProducts[0],
+          midProducts[0],
+          premiumProducts[0]
+        ].filter(Boolean);
+
+        setRecommendations(recommendations);
+      } catch (err) {
+        setError('Der opstod en fejl ved hentning af anbefalinger');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchRecommendations();
+  }, [formData]);
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }).map((_, index) => (
+      <Star
+        key={index}
+        className={\`w-5 h-5 \${
+          index < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+        }\`}
+      />
+    ));
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-xl text-gray-600">Henter anbefalinger...</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-xl text-red-600">{error}</p>
+          <button
+            onClick={() => navigate('/${componentName.toLowerCase()}')}
+            className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Prøv igen
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (recommendations.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-xl text-gray-600">Ingen produkter fundet der matcher dine kriterier</p>
+          <button
+            onClick={() => navigate('/${componentName.toLowerCase()}')}
+            className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-800"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Prøv igen med andre kriterier
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
+      <div className="max-w-7xl mx-auto px-4">
+        <button
+          onClick={() => navigate('/${componentName.toLowerCase()}')}
+          className="flex items-center text-blue-600 hover:text-blue-800 mb-8"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Tilbage til spørgsmål
+        </button>
+
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Dine anbefalede ${displayName.toLowerCase()}</h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {recommendations.map((product) => (
+            <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden relative">
+              <div className="aspect-square overflow-hidden relative">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 right-2 bg-blue-400 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  {product.tier === 'budget' ? 'Budget' :
+                   product.tier === 'mid' ? 'Mid-range' :
+                   'Premium'}
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-bold text-gray-900">{product.name}</h3>
+                  <span className="text-sm text-gray-600 ml-2">
+                    {product.matchCount} nøgleord matcher
+                  </span>
+                </div>
+                <div className="flex items-center mb-4">
+                  {renderStars(product.rating)}
+                  <span className="ml-2 text-gray-600">{product.rating}/5</span>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 mb-4">
+                  {product.price.toLocaleString('da-DK')} kr.
+                </p>
+                <div className="mb-4">
+                  <h4 className="font-semibold mb-2">Nøglefunktioner:</h4>
+                  <ul className="space-y-2">
+                    {product.features.slice(0, 4).map((feature, index) => (
+                      <li key={index} className="text-gray-600">
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <a
+                  href={product.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                >
+                  Se pris hos {product.store} <ExternalLink className="w-4 h-4 ml-2" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ${componentName}Recommendations;`;
+  };
+  const createCategoryTable = async (categoryId: string) => {
+    try {
+      // Create the SQL for the new table
+      const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS ${categoryId} (
+          id text PRIMARY KEY,
+          name text NOT NULL,
+          price integer NOT NULL,
+          image text NOT NULL,
+          energy_class text NOT NULL,
+          capacity integer NOT NULL,
+          features text[] NOT NULL,
+          rating numeric NOT NULL CHECK (rating >= 0 AND rating <= 5),
+          link text NOT NULL,
+          store text NOT NULL,
+          description text NOT NULL,
+          keywords text[] NOT NULL,
+          tier text NOT NULL CHECK (tier = ANY (ARRAY['budget'::text, 'mid'::text, 'premium'::text])),
+          created_at timestamptz DEFAULT now(),
+          updated_at timestamptz DEFAULT now()
+        );
+
+        -- Enable RLS
+        ALTER TABLE ${categoryId} ENABLE ROW LEVEL SECURITY;
+
+        -- Add RLS policies
+        CREATE POLICY "Allow public read access" ON ${categoryId} FOR SELECT TO public USING (true);
+        CREATE POLICY "Allow public insert access" ON ${categoryId} FOR INSERT TO public WITH CHECK (true);
+        CREATE POLICY "Allow public update access" ON ${categoryId} FOR UPDATE TO public USING (true) WITH CHECK (true);
+        CREATE POLICY "Allow public delete access" ON ${categoryId} FOR DELETE TO public USING (true);
+
+        -- Add update trigger
+        CREATE TRIGGER update_${categoryId}_updated_at 
+          BEFORE UPDATE ON ${categoryId} 
+          FOR EACH ROW 
+          EXECUTE FUNCTION update_updated_at_column();
+
+        -- Add change tracking trigger
+        CREATE TRIGGER track_${categoryId}_changes 
+          AFTER UPDATE ON ${categoryId} 
+          FOR EACH ROW 
+          EXECUTE FUNCTION track_product_changes();
+      `;
+
+      // Execute the SQL using the RPC function
+      const { error } = await supabase.rpc('execute_sql', { sql_query: createTableSQL });
+      
+      if (error) {
+        console.error('Error creating table:', error);
+        // If RPC doesn't exist, we'll need to create it via migration
+        throw new Error(`Kunne ikke oprette tabel: ${error.message}`);
+      }
+    } catch (err) {
+      console.error('Error in createCategoryTable:', err);
+      throw err;
+    }
+  };
+
+  const getTotalKeywords = () => {
+    return formData.questions.reduce((total, question) => total + question.options.length, 0);
+  };
+
   const updateAvailableKeywords = async () => {
     try {
-      // First, delete existing keywords for this category
-      const { error: deleteError } = await supabase
-        .from('available_keywords')
-        .delete()
-        .eq('category', formData.id);
-
-      if (deleteError) throw deleteError;
-
-      // Then insert new keywords - use Map to ensure uniqueness
-      const uniqueKeywords = new Map();
+      // Collect all keywords from form data
+      const allKeywords: { category: string; keyword: string }[] = [];
       formData.questions.forEach(question => {
         question.options.forEach(option => {
-          const key = `${question.key}:${option.value}`;
-          if (!uniqueKeywords.has(key)) {
-            uniqueKeywords.set(key, {
-              category: question.key,
-              keyword: option.value
-            });
-          }
+          allKeywords.push({
+            category: question.key,
+            keyword: option.value
+          });
         });
       });
 
-      const keywordsToInsert = Array.from(uniqueKeywords.values());
-
-      if (keywordsToInsert.length > 0) {
+      // Insert all keywords
+      if (allKeywords.length > 0) {
         const { error: insertError } = await supabase
           .from('available_keywords')
-          .insert(keywordsToInsert);
+          .insert(allKeywords)
+          .onConflict('category,keyword')
+          .doNothing();
 
         if (insertError) throw insertError;
       }
@@ -691,16 +1171,14 @@ function CategoryManagementDialog({ isOpen, onClose }: CategoryManagementDialogP
           return keywordMapping.get(keyword) || keyword;
         });
 
-        // Only update if keywords actually changed
+        // Insert keywords with onConflict to handle duplicates gracefully
         if (JSON.stringify(updatedKeywords) !== JSON.stringify(product.keywords)) {
           const { error: updateError } = await supabase
             .from('all_products')
             .update({ keywords: updatedKeywords })
             .eq('id', product.id);
 
-          if (updateError) {
-            console.error(`Error updating product ${product.id}:`, updateError);
-          }
+          if (updateError) throw updateError;
         }
       }
     } catch (err) {

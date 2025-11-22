@@ -7,6 +7,7 @@ import PriceDialog from './PriceDialog';
 import ProductSearchDialog from './ProductSearchDialog';
 import ProductList from './ProductList';
 import CategoryManagementDialog from './CategoryManagementDialog';
+import KeywordsManagementDialog from './KeywordsManagementDialog';
 
 // Add this after the imports
 function getProductTypeName(type: string) {
@@ -36,6 +37,7 @@ function AdminDashboard() {
   const [refreshing, setRefreshing] = useState<string | null>(null);
   const [updatingAllPrices, setUpdatingAllPrices] = useState(false);
   const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+  const [showKeywordsDialog, setShowKeywordsDialog] = useState(false);
 
   const handleUpdateAllPrices = async () => {
     if (!confirm(`Er du sikker på, at du vil opdatere priser for alle ${products.length} produkter? Dette kan tage flere minutter.`)) {
@@ -255,6 +257,13 @@ function AdminDashboard() {
                   <RotateCw className="w-5 h-5 mr-2" />
                 )}
                 {updatingAllPrices ? 'Opdaterer priser...' : 'Opdater alle priser'}
+              </button>
+              <button
+                onClick={() => setShowKeywordsDialog(true)}
+                className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Administrer Nøgleord
               </button>
               <button
                 onClick={() => setShowCategoryDialog(true)}
@@ -517,6 +526,10 @@ function AdminDashboard() {
         onProductAdded={fetchProducts}
       />
 
+      <KeywordsManagementDialog
+        isOpen={showKeywordsDialog}
+        onClose={() => setShowKeywordsDialog(false)}
+      />
       <CategoryManagementDialog
         isOpen={showCategoryDialog}
         onClose={() => setShowCategoryDialog(false)}
