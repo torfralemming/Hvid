@@ -42,6 +42,7 @@ type AddKeywordDialogProps = {
   onClose: () => void;
   onAdd: (keyword: string) => void;
   category: string;
+  productCategory: string;
 };
 
 type KeywordDialogProps = {
@@ -57,7 +58,7 @@ type AvailableKeywords = {
   [category: string]: string[];
 };
 
-function AddKeywordDialog({ isOpen, onClose, onAdd, category }: AddKeywordDialogProps) {
+function AddKeywordDialog({ isOpen, onClose, onAdd, category, productCategory }: AddKeywordDialogProps) {
   const [newKeyword, setNewKeyword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -74,7 +75,7 @@ function AddKeywordDialog({ isOpen, onClose, onAdd, category }: AddKeywordDialog
       // Add the new keyword to available_keywords table
       const { error: insertError } = await supabase
         .from('available_keywords')
-        .insert({ category, keyword: newKeyword.trim() });
+        .insert({ category, keyword: newKeyword.trim(), product_type: productCategory });
 
       if (insertError) throw insertError;
 
@@ -163,7 +164,8 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
         setLoading(true);
         const { data, error } = await supabase
           .from('available_keywords')
-          .select('category, keyword');
+          .select('category, keyword')
+          .eq('product_type', productCategory);
 
         if (error) throw error;
 
@@ -352,9 +354,28 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
       setSaving(true);
       setError(null);
 
-      // Update the all_products table
+      // Determine which table to update based on product category
+      let tableName = 'all_products';
+      switch (productCategory) {
+        case 'washing_machine':
+          tableName = 'washing_machines';
+          break;
+        case 'dishwasher':
+          tableName = 'dishwashers';
+          break;
+        case 'refrigerator':
+          tableName = 'refrigerators';
+          break;
+        case 'oven':
+          tableName = 'ovens';
+          break;
+        default:
+          tableName = 'all_products';
+      }
+
+      // Update the appropriate table
       const { error: updateError } = await supabase
-        .from('all_products')
+        .from(tableName)
         .update({ keywords: selectedKeywords })
         .eq('id', productId);
 
@@ -466,6 +487,7 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
         onClose={() => setShowAddKeywordDialog(false)}
         onAdd={handleAddKeyword}
         category={selectedCategory}
+        productCategory={productCategory}
       />
     </div>
   );
