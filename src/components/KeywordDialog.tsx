@@ -42,6 +42,7 @@ type AddKeywordDialogProps = {
   onClose: () => void;
   onAdd: (keyword: string) => void;
   category: string;
+  productCategory: string;
 };
 
 type KeywordDialogProps = {
@@ -57,7 +58,7 @@ type AvailableKeywords = {
   [category: string]: string[];
 };
 
-function AddKeywordDialog({ isOpen, onClose, onAdd, category }: AddKeywordDialogProps) {
+function AddKeywordDialog({ isOpen, onClose, onAdd, category, productCategory }: AddKeywordDialogProps) {
   const [newKeyword, setNewKeyword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -71,10 +72,14 @@ function AddKeywordDialog({ isOpen, onClose, onAdd, category }: AddKeywordDialog
     }
 
     try {
-      // Add the new keyword to available_keywords table
+      // Add the new keyword to available_keywords table with product_type
       const { error: insertError } = await supabase
         .from('available_keywords')
-        .insert({ category, keyword: newKeyword.trim() });
+        .insert({
+          category,
+          keyword: newKeyword.trim(),
+          product_type: productCategory === 'tv' ? null : productCategory
+        });
 
       if (insertError) throw insertError;
 
@@ -163,7 +168,7 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
         setLoading(true);
         const { data, error } = await supabase
           .from('available_keywords')
-          .select('category, keyword');
+          .select('category, keyword, product_type');
 
         if (error) throw error;
 
@@ -179,7 +184,7 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
             'pictureQuality': ['LED', 'QLED', 'OLED', 'QOLED'],
             'timeOfDay': ['LED', 'QLED', 'OLED']
           };
-          
+
           // Merge with existing keywords
           const keywords = { ...data.reduce((acc, curr) => {
             if (!acc[curr.category]) {
@@ -188,18 +193,21 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
             acc[curr.category].push(curr.keyword);
             return acc;
           }, {} as AvailableKeywords), ...tvKeywords };
-          
+
           setAvailableKeywords(keywords);
         } else {
           // Group keywords by category for non-TV products
-          const keywords = data.reduce((acc: AvailableKeywords, curr) => {
-            if (!acc[curr.category]) {
-              acc[curr.category] = [];
-            }
-            acc[curr.category].push(curr.keyword);
-            return acc;
-          }, {});
-          
+          // Filter by product_type to only show relevant keywords
+          const keywords = data
+            .filter(curr => curr.product_type === null || curr.product_type === productCategory)
+            .reduce((acc: AvailableKeywords, curr) => {
+              if (!acc[curr.category]) {
+                acc[curr.category] = [];
+              }
+              acc[curr.category].push(curr.keyword);
+              return acc;
+            }, {});
+
           setAvailableKeywords(keywords);
         }
       } catch (err) {
@@ -466,6 +474,7 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
         onClose={() => setShowAddKeywordDialog(false)}
         onAdd={handleAddKeyword}
         category={selectedCategory}
+        productCategory={productCategory}
       />
     </div>
   );
