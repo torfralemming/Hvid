@@ -163,8 +163,7 @@ function KeywordDialog({ isOpen, onClose, onSave, currentKeywords, productCatego
         setLoading(true);
         const { data, error } = await supabase
           .from('available_keywords')
-          .select('category, keyword')
-          .eq('product_type', productCategory);
+          .select('category, keyword');
 
         if (error) throw error;
 
