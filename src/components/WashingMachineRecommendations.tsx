@@ -490,13 +490,6 @@ function WashingMachineRecommendations() {
                 <p className="text-2xl font-bold text-blue-600 mb-4">
                   {machine.price.toLocaleString('da-DK')} kr.
                 </p>
-                <div className="space-y-2 mb-4">
-                  <p className="text-gray-600">Kapacitet: {extractCapacityFromFeatures(machine)} kg</p>
-                  <p className="text-gray-600">Energiklasse: {machine.energy_class}</p>
-                  {machine.type_specific_data?.rpm && (
-                    <p className="text-gray-600">Centrifugering: {machine.type_specific_data.rpm} omdr/min</p>
-                  )}
-                </div>
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2">Nøglefunktioner:</h4>
                   <ul className="space-y-2">

@@ -258,11 +258,6 @@ function TVRecommendations() {
                 <p className="text-2xl font-bold text-blue-600 mb-4">
                   {tv.price.toLocaleString('da-DK')} kr.
                 </p>
-                <div className="space-y-2 mb-4">
-                  <p className="text-gray-600">Skærmstørrelse: {tv.capacity}"</p>
-                  <p className="text-gray-600">Opløsning: {tv.type_specific_data.resolution}</p>
-                  <p className="text-gray-600">Opdateringshastighed: {tv.type_specific_data.refresh_rate} Hz</p>
-                </div>
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2">Nøglefunktioner:</h4>
                   <ul className="space-y-2">
