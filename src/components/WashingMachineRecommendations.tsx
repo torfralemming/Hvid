@@ -313,17 +313,17 @@ function WashingMachineRecommendations() {
           })
           .filter(({ matchCount }) => matchCount >= 3);
 
-        // Sort by match count first, then by price within each tier
+        // Sort by match count first, then by price within each price range
         const budgetMachines = scoredMachines
-          .filter(m => m.tier === 'budget')
+          .filter(m => m.price >= 0 && m.price <= 3499)
           .sort((a, b) => b.matchCount - a.matchCount || a.price - b.price);
-        
+
         const midMachines = scoredMachines
-          .filter(m => m.tier === 'mid')
+          .filter(m => m.price >= 3500 && m.price <= 6499)
           .sort((a, b) => b.matchCount - a.matchCount || a.price - b.price);
-        
+
         const premiumMachines = scoredMachines
-          .filter(m => m.tier === 'premium')
+          .filter(m => m.price >= 7000 && m.price <= 40000)
           .sort((a, b) => b.matchCount - a.matchCount || a.price - b.price);
 
         const recommendations = [
