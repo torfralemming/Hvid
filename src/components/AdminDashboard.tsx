@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, Edit2, ArrowUpDown, Plus, X } from 'lucide-react';
+import { ArrowLeft, Edit2, ArrowUpDown, Plus, X, RotateCw } from 'lucide-react';
 import KeywordDialog from './KeywordDialog';
 import PriceDialog from './PriceDialog';
 import ProductSearchDialog from './ProductSearchDialog';
 import ProductList from './ProductList';
+import CategoryManagementDialog from './CategoryManagementDialog';
 
 // Add this after the imports
 function getProductTypeName(type: string) {
@@ -32,6 +33,74 @@ function AdminDashboard() {
     direction: 'asc'
   });
   const [showLatestProducts, setShowLatestProducts] = useState(false);
+  const [refreshing, setRefreshing] = useState<string | null>(null);
+  const [updatingAllPrices, setUpdatingAllPrices] = useState(false);
+  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
+
+  const handleUpdateAllPrices = async () => {
+    if (!confirm(`Er du sikker på, at du vil opdatere priser for alle ${products.length} produkter? Dette kan tage flere minutter.`)) {
+      return;
+    }
+
+    try {
+      setUpdatingAllPrices(true);
+      setError(null);
+      
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const product of products) {
+        try {
+          // Extract the Power product ID from our product ID
+          const powerProductId = product.id.split('-')[1];
+          if (!powerProductId) continue;
+          
+          const response = await fetch('https://scovfppftngipmzpnlsl.supabase.co/functions/v1/power-api1', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({
+              endpoint: 'products',
+              ids: [powerProductId]
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch updated price');
+          }
+
+          const data = await response.json();
+          const updatedPrice = data.products[0]?.price;
+
+          if (updatedPrice && updatedPrice !== product.price) {
+            const { error: updateError } = await supabase
+              .from('all_products')
+              .update({ price: updatedPrice })
+              .eq('id', product.id);
+
+            if (updateError) throw updateError;
+            successCount++;
+          }
+          
+          // Add small delay to avoid overwhelming the API
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (err) {
+          console.error(`Error updating price for ${product.name}:`, err);
+          errorCount++;
+        }
+      }
+      
+      await fetchProducts();
+      alert(`Prisopdatering færdig!\nOpdateret: ${successCount} produkter\nFejl: ${errorCount} produkter`);
+    } catch (err) {
+      console.error('Error updating all prices:', err);
+      setError('Der opstod en fejl ved opdatering af priser');
+    } finally {
+      setUpdatingAllPrices(false);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -96,6 +165,46 @@ function AdminDashboard() {
     }));
   };
 
+  const handleRefreshPrice = async (product: any) => {
+    try {
+      setRefreshing(product.id);
+      const response = await fetch('https://scovfppftngipmzpnlsl.supabase.co/functions/v1/power-api1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          endpoint: 'products',
+          ids: [product.id.split('-')[1]] // Extract the Power product ID
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch updated price');
+      }
+
+      const data = await response.json();
+      const updatedPrice = data.products[0]?.price;
+
+      if (updatedPrice) {
+        const { error: updateError } = await supabase
+          .from('all_products')
+          .update({ price: updatedPrice })
+          .eq('id', product.id);
+
+        if (updateError) throw updateError;
+
+        await fetchProducts();
+      }
+    } catch (err) {
+      console.error('Error refreshing price:', err);
+      setError('Der opstod en fejl ved opdatering af pris');
+    } finally {
+      setRefreshing(null);
+    }
+  };
+
   const sortedProducts = [...products].sort((a: any, b: any) => {
     const direction = sortConfig.direction === 'asc' ? 1 : -1;
     
@@ -134,13 +243,34 @@ function AdminDashboard() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Administrer Produkter</h2>
-            <button
-              onClick={() => setShowSearchDialog(true)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Tilføj produkt
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={handleUpdateAllPrices}
+                disabled={updatingAllPrices || products.length === 0}
+                className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-green-300"
+              >
+                {updatingAllPrices ? (
+                  <RotateCw className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <RotateCw className="w-5 h-5 mr-2" />
+                )}
+                {updatingAllPrices ? 'Opdaterer priser...' : 'Opdater alle priser'}
+              </button>
+              <button
+                onClick={() => setShowCategoryDialog(true)}
+                className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Administrer Kategorier
+              </button>
+              <button
+                onClick={() => setShowSearchDialog(true)}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Tilføj produkt
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -215,10 +345,16 @@ function AdminDashboard() {
                     </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Funktioner
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Nøgleord
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Handlinger
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Opdater
                   </th>
                 </tr>
               </thead>
@@ -264,6 +400,22 @@ function AdminDashboard() {
                       </button>
                     </td>
                     <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-xs overflow-hidden">
+                        {product.features && product.features.length > 0 ? (
+                          <ul className="list-disc list-inside">
+                            {product.features.slice(0, 3).map((feature: string, idx: number) => (
+                              <li key={idx} className="truncate">{feature}</li>
+                            ))}
+                            {product.features.length > 3 && (
+                              <li className="text-gray-500">+{product.features.length - 3} mere</li>
+                            )}
+                          </ul>
+                        ) : (
+                          <span className="text-gray-500 italic">Ingen funktioner</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
                         {product.keywords.slice(0, 3).map((keyword: string, index: number) => (
                           <span
@@ -287,6 +439,19 @@ function AdminDashboard() {
                       >
                         <Edit2 className="w-4 h-4 mr-1" />
                         Rediger nøgleord
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleRefreshPrice(product)}
+                        disabled={refreshing === product.id}
+                        className={`text-blue-600 hover:text-blue-800 ${refreshing === product.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {refreshing === product.id ? (
+                          <RotateCw className="w-5 h-5 animate-spin" />
+                        ) : (
+                          '🔄'
+                        )}
                       </button>
                     </td>
                   </tr>
@@ -350,6 +515,11 @@ function AdminDashboard() {
         isOpen={showSearchDialog}
         onClose={() => setShowSearchDialog(false)}
         onProductAdded={fetchProducts}
+      />
+
+      <CategoryManagementDialog
+        isOpen={showCategoryDialog}
+        onClose={() => setShowCategoryDialog(false)}
       />
     </div>
   );

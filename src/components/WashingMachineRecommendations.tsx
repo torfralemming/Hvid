@@ -75,69 +75,203 @@ const featureDescriptions: Record<string, string> = {
   'CapDosing': 'Med CapDosing kan du eksempelvis reimprenere regntøj, styrke uld etc. Det er en Cap der sælges seperat og kan kune bruges i en miele vaskemaskine'
 };
 
-function getMatchDescription(machine: WashingMachine, formData: FormData): string {
-  const descriptions: string[] = [];
-  const unmetNeeds: string[] = [];
-
-  // Match keywords with form data
-  const matchingKeywords = machine.keywords.filter(k => formData.keywords.includes(k));
-  const unmetKeywords = formData.keywords.filter(k => !machine.keywords.includes(k));
-  
-  if (matchingKeywords.length > 0) {
-    const metNeeds = matchingKeywords.map(k => {
-      if (k.includes('honeycomb-eco')) {
-        return 'denne maskine er valgt til dig fordi du ønsker at passe på klimaet. Den har en særlig tromle der er designet til at holde dit tøj længere';
-      }
-      if (k.includes('Autodose') || k.includes('autodose')) {
-        return 'maskinen har automatisk dosering af vaskemiddel, hvilket betyder at den vejer tøjet og sørger for at bruge den helt korrekte mængde sæbe. Dette skåner både miljøet og dit tøj, og derudover din pengepung!';
-      }
-      if (k.includes('Steam') || k.includes('Steamfunc')) {
-        return 'maskinen har dampfunktion som hjælper med at reducere krøl og opfriske tøj der kun har været brugt én gang. Når du damper dit tøj, fjernes 99.9% af alle støvmider, lugtgener og bakterier. Derudover trækkes fibrene i dit tøj sammen igen, så "hængerøv og knæ" i bukserne fjernes. Så i stedet for at vaske tøj som ikke er beskidt kan du nøjes med at dampe det og sparre en masse penge på vand og strøm. Endnu en gode er at et dampprogram kun tager 15-25 minutter!';
-      }
-      if (k.includes('PowerWash')) {
-        return 'maskinen har en effektiv vasketeknologi der sikrer grundig vask på kortere tid og med mindre energiforbrug';
-      }
-      if (k.includes('family') || k.includes('largefamily')) {
-        return `med en kapacitet på ${machine.capacity} kg er maskinen perfekt til familiens behov`;
-      }
-      return '';
-    }).filter(Boolean);
-
-    descriptions.push(metNeeds.join('. '));
-  }
-
-  // Analyze unmet needs
-  if (unmetKeywords.length > 0) {
-    const unmetNeedsList = unmetKeywords.map(k => {
-      if (k.includes('honeycomb-eco') && !matchingKeywords.includes('honeycomb-eco')) {
-        return 'maskinen har ikke specielle funktioner til at forlænge tøjets levetid';
-      }
-      if (k.includes('Autodose') && !matchingKeywords.includes('Autodose')) {
-        return 'maskinen har ikke automatisk dosering af vaskemiddel';
-      }
-      if (k.includes('Steam') && !matchingKeywords.includes('Steam')) {
-        return 'maskinen har ikke dampfunktion';
-      }
-      return '';
-    }).filter(Boolean);
-
-    if (unmetNeedsList.length > 0) {
-      descriptions.push(`Vær opmærksom på at ${unmetNeedsList.join(' og ')}`);
+function extractCapacityFromFeatures(machine: WashingMachine): number {
+  // Look for capacity in features array
+  for (const feature of machine.features) {
+    const match = feature.match(/(\d+(?:[,.]\d+)?)\s*kg/i);
+    if (match) {
+      return parseFloat(match[1].replace(',', '.'));
     }
   }
+  
+  // Look for capacity in name as fallback
+  const nameMatch = machine.name.match(/(\d+(?:[,.]\d+)?)\s*kg/i);
+  if (nameMatch) {
+    return parseFloat(nameMatch[1].replace(',', '.'));
+  }
+  
+  // Default fallback
+  return machine.capacity || 8;
+}
 
-  // Add energy efficiency description
-  if (machine.energy_class === 'A' || machine.energy_class === 'B') {
-    descriptions.push(`${machine.energy_class}-energimærkningen sikrer lave driftsomkostninger`);
+function getMatchDescription(machine: WashingMachine, formData: FormData): string {
+  const coveredNeeds: string[] = [];
+  const notCoveredNeeds: string[] = [];
+
+  // Define all possible needs based on form questions
+  const allNeeds = [
+    {
+      key: 'household',
+      label: 'Husstandsstørrelse',
+      getValue: () => {
+        if (formData.keywords.includes('single')) return 'Én person';
+        if (formData.keywords.includes('couple')) return '2-3 personer';
+        if (formData.keywords.includes('family')) return '4-5 personer';
+        if (formData.keywords.includes('largefamily')) return '5+ personer';
+        return null;
+      },
+      isCovered: () => {
+        const userNeed = formData.keywords.find(k => ['single', 'couple', 'family', 'largefamily'].includes(k));
+        return userNeed ? machine.keywords.includes(userNeed) : false;
+      }
+    },
+    {
+      key: 'washFrequency',
+      label: 'Vaskefrekvens',
+      getValue: () => {
+        if (formData.keywords.includes('everyday')) return 'Hver dag';
+        if (formData.keywords.includes('almosteveryday')) return '4-6 gange om ugen';
+        if (formData.keywords.includes('weekly')) return '2-3 gange om ugen';
+        if (formData.keywords.includes('onceaweek')) return '1 gang om ugen';
+        return null;
+      },
+      isCovered: () => {
+        const userNeed = formData.keywords.find(k => ['everyday', 'almosteveryday', 'weekly', 'onceaweek'].includes(k));
+        return userNeed ? machine.keywords.includes(userNeed) : false;
+      }
+    },
+    {
+      key: 'cleanClothes',
+      label: 'Rent tøj (dampfunktion)',
+      getValue: () => {
+        if (formData.keywords.includes('steamFunc') || formData.keywords.includes('Steamfunc')) return 'Har brug for dampfunktion';
+        if (formData.keywords.includes('nosteam')) return 'Ingen dampfunktion nødvendig';
+        return null;
+      },
+      isCovered: () => {
+        const needsSteam = formData.keywords.includes('steamFunc') || formData.keywords.includes('Steamfunc');
+        const noSteamNeeded = formData.keywords.includes('nosteam');
+        if (needsSteam) return machine.keywords.some(k => k.includes('Steam'));
+        if (noSteamNeeded) return true; // No steam needed is always covered
+        return false;
+      }
+    },
+    {
+      key: 'clothesCare',
+      label: 'Tøjpleje',
+      getValue: () => {
+        if (formData.keywords.includes('honeycomb-luxury')) return 'Særlig skånsom tromle til dyrt tøj';
+        if (formData.keywords.includes('honeycomb-eco')) return 'Miljøvenlig tøjpleje';
+        if (formData.keywords.includes('normaldrum')) return 'Standard tromle';
+        return null;
+      },
+      isCovered: () => {
+        const userNeed = formData.keywords.find(k => ['honeycomb-luxury', 'honeycomb-eco', 'normaldrum'].includes(k));
+        return userNeed ? machine.keywords.includes(userNeed) : false;
+      }
+    },
+    {
+      key: 'detergent',
+      label: 'Vaskemiddel dosering',
+      getValue: () => {
+        if (formData.keywords.includes('Autodose') || formData.keywords.includes('autodose')) return 'Automatisk dosering';
+        if (formData.keywords.includes('SelfDose') || formData.keywords.includes('selfdose')) return 'Manuel dosering';
+        return null;
+      },
+      isCovered: () => {
+        const needsAuto = formData.keywords.includes('Autodose') || formData.keywords.includes('autodose');
+        const needsManual = formData.keywords.includes('SelfDose') || formData.keywords.includes('selfdose');
+        if (needsAuto) return machine.keywords.some(k => k.includes('Autodose') || k.includes('autodose'));
+        if (needsManual) return true; // Manual dosing is always available
+        return false;
+      }
+    },
+    {
+      key: 'brand',
+      label: 'Mærkepreference',
+      getValue: () => {
+        if (formData.keywords.includes('AEG')) return 'AEG';
+        if (formData.keywords.includes('Siemens')) return 'Siemens';
+        if (formData.keywords.includes('miele')) return 'Miele';
+        if (formData.keywords.includes('Electrolux')) return 'Electrolux';
+        if (formData.keywords.includes('Anybrand')) return 'Hvilket som helst mærke';
+        return null;
+      },
+      isCovered: () => {
+        const userBrand = formData.keywords.find(k => ['AEG', 'Siemens', 'miele', 'Electrolux', 'Anybrand'].includes(k));
+        if (userBrand === 'Anybrand') return true; // Any brand is always covered
+        return userBrand ? machine.keywords.includes(userBrand) : false;
+      }
+    },
+    {
+      key: 'washDuration',
+      label: 'Vasketid',
+      getValue: () => {
+        if (formData.keywords.includes('PowerWash')) return 'Hurtig vask (1 time)';
+        if (formData.keywords.includes('Speedwash')) return 'Super hurtig vask';
+        if (formData.keywords.includes('ecowash')) return 'Økonomisk vask (1-4 timer)';
+        return null;
+      },
+      isCovered: () => {
+        const userNeed = formData.keywords.find(k => ['PowerWash', 'Speedwash', 'ecowash'].includes(k));
+        return userNeed ? machine.keywords.includes(userNeed) : false;
+      }
+    },
+    {
+      key: 'shirts',
+      label: 'Skjorter (strygning)',
+      getValue: () => {
+        if (formData.keywords.includes('Steam')) return 'Dampfunktion til skjorter';
+        if (formData.keywords.includes('nosteam')) return 'Ingen dampfunktion nødvendig';
+        return null;
+      },
+      isCovered: () => {
+        const needsSteam = formData.keywords.includes('Steam');
+        const noSteamNeeded = formData.keywords.includes('nosteam');
+        if (needsSteam) return machine.keywords.some(k => k.includes('Steam'));
+        if (noSteamNeeded) return true; // No steam needed is always covered
+        return false;
+      }
+    }
+  ];
+
+  // Filter to only show needs that the user has specified
+  const userNeeds = allNeeds.filter(need => need.getValue() !== null);
+
+  // Separate covered and not covered needs
+  userNeeds.forEach(need => {
+    const isCovered = need.isCovered();
+    const needText = `${need.label}: ${need.getValue()}`;
+    
+    if (isCovered) {
+      coveredNeeds.push(needText);
+    } else {
+      notCoveredNeeds.push(needText);
+    }
+  });
+
+  // Build the description as HTML-like structure for better formatting
+  let description = '';
+  
+  if (coveredNeeds.length > 0) {
+    description += '<div><strong>✅ Dækkede behov:</strong></div>';
+    coveredNeeds.forEach(need => {
+      description += `<div>• ${need}</div>`;
+    });
+  }
+  
+  if (notCoveredNeeds.length > 0) {
+    if (description) description += '<br>';
+    description += '<div><strong>👎 Ikke dækkede behov:</strong></div>';
+    notCoveredNeeds.forEach(need => {
+      description += `<div>• ${need}</div>`;
+    });
+  }
+  
+  if (userNeeds.length === 0) {
+    description = 'Denne maskine matcher dine grundlæggende behov.';
   }
 
-  // Add type-specific data
+  // Add additional info
+  if (description) description += '<br>';
+  description += `<div><strong>💡 Energieffektivitet:</strong> ${machine.energy_class}-energimærkning</div>`;
+
   if (machine.type_specific_data) {
     const { rpm, annual_energy_consumption, annual_water_consumption } = machine.type_specific_data;
-    descriptions.push(`Maskinen har en centrifugeringshastighed på ${rpm} omdrejninger, et årligt energiforbrug på ${annual_energy_consumption} kWh og et årligt vandforbrug på ${annual_water_consumption} liter`);
+    description += `<div><strong>📊 Tekniske data:</strong> ${rpm} omdr/min, ${annual_energy_consumption} kWh/år, ${annual_water_consumption} L/år</div>`;
   }
 
-  return descriptions.join('. ') + '.';
+  return description;
 }
 
 function WashingMachineRecommendations() {
@@ -334,9 +468,10 @@ function WashingMachineRecommendations() {
                         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
                       }}
                     >
-                      <p className="text-sm text-gray-700 whitespace-normal">
-                        {getMatchDescription(machine, formData)}
-                      </p>
+                      <div 
+                        className="text-sm text-gray-700"
+                        dangerouslySetInnerHTML={{ __html: getMatchDescription(machine, formData) }}
+                      />
                     </div>
                   )}
                 </div>
@@ -356,9 +491,11 @@ function WashingMachineRecommendations() {
                   {machine.price.toLocaleString('da-DK')} kr.
                 </p>
                 <div className="space-y-2 mb-4">
+                  <p className="text-gray-600">Kapacitet: {extractCapacityFromFeatures(machine)} kg</p>
                   <p className="text-gray-600">Energiklasse: {machine.energy_class}</p>
-                  <p className="text-gray-600">Kapacitet: {machine.capacity} kg</p>
-                  <p className="text-gray-600">Centrifugering: {machine.type_specific_data.rpm} rpm</p>
+                  {machine.type_specific_data?.rpm && (
+                    <p className="text-gray-600">Centrifugering: {machine.type_specific_data.rpm} omdr/min</p>
+                  )}
                 </div>
                 <div className="mb-4">
                   <h4 className="font-semibold mb-2">Nøglefunktioner:</h4>

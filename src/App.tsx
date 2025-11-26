@@ -9,6 +9,8 @@ import OvenForm from './components/OvenForm.tsx';
 import OvenRecommendations from './components/OvenRecommendations.tsx';
 import RefrigeratorForm from './components/RefrigeratorForm.tsx';
 import RefrigeratorRecommendations from './components/RefrigeratorRecommendations.tsx';
+import TVForm from './components/TVForm.tsx';
+import TVRecommendations from './components/TVRecommendations.tsx';
 import Analytics from './components/Analytics.tsx';
 import LoginDialog from './components/LoginDialog.tsx';
 import AdminDashboard from './components/AdminDashboard.tsx';
@@ -24,8 +26,8 @@ const categories: Category[] = [
   { id: 'dishwasher', name: 'Opvaskemaskine', icon: '🍽️' },
   { id: 'oven', name: 'Ovn', icon: '🔥' },
   { id: 'refrigerator', name: 'Køleskab', icon: '❄️' },
-  { id: 'gaming-pc', name: 'Gamer-PC', icon: '🖥️' },
   { id: 'tv', name: 'TV', icon: '📺' },
+  { id: 'gaming-pc', name: 'Gamer-PC', icon: '🖥️' },
   { id: 'smartphone', name: 'Smartphone', icon: '📱' },
 ];
 
@@ -184,6 +186,8 @@ function App() {
       <Route path="/oven/recommendations" element={<OvenRecommendations />} />
       <Route path="/refrigerator" element={<RefrigeratorForm />} />
       <Route path="/refrigerator/recommendations" element={<RefrigeratorRecommendations />} />
+      <Route path="/tv" element={<TVForm />} />
+      <Route path="/tv/recommendations" element={<TVRecommendations />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
