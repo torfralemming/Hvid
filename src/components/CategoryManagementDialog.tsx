@@ -1040,5 +1040,3 @@ function CategoryManagementDialog({ isOpen, onClose }: CategoryManagementDialogP
 }
 
 export default CategoryManagementDialog;
-
-export default CategoryManagementDialog
