@@ -36,118 +36,87 @@ export default function CategoryUrlDialog({ isOpen, onClose, onProductsAdded }: 
 
       setProgress({ current: 0, total: 0, message: 'Henter produkter fra kategori...' });
 
-      const response = await fetch('https://scovfppftngipmzpnlsl.supabase.co/functions/v1/power-api1', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/power-api`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
-          endpoint: 'categories',
-          ids: [categoryId]
+          endpoint: 'category',
+          url: categoryUrl
         })
       });
 
       if (!response.ok) {
-        throw new Error('Kunne ikke hente kategori data fra Power API');
+        throw new Error('Kunne ikke hente produkter fra Power.dk');
       }
 
       const data = await response.json();
-      const productIds = data.categories[0]?.productIds || [];
+      const products = data.products || [];
 
-      if (productIds.length === 0) {
+      if (products.length === 0) {
         throw new Error('Ingen produkter fundet i denne kategori');
       }
 
-      setProgress({ current: 0, total: productIds.length, message: `Fundet ${productIds.length} produkter. Henter detaljer...` });
+      setProgress({ current: 0, total: products.length, message: `Fundet ${products.length} produkter. Tilføjer til database...` });
 
-      const batchSize = 20;
       let addedCount = 0;
       let skippedCount = 0;
       let errorCount = 0;
 
-      for (let i = 0; i < productIds.length; i += batchSize) {
-        const batch = productIds.slice(i, i + batchSize);
+      for (let i = 0; i < products.length; i++) {
+        const product = products[i];
 
         setProgress({
-          current: i,
-          total: productIds.length,
-          message: `Behandler produkter ${i + 1}-${Math.min(i + batchSize, productIds.length)} af ${productIds.length}...`
+          current: i + 1,
+          total: products.length,
+          message: `Behandler produkt ${i + 1} af ${products.length}...`
         });
 
         try {
-          const productsResponse = await fetch('https://scovfppftngipmzpnlsl.supabase.co/functions/v1/power-api1', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-              endpoint: 'products',
-              ids: batch
-            })
-          });
+          const productId = `power-${product.id}`;
 
-          if (!productsResponse.ok) {
-            console.error('Failed to fetch batch:', batch);
-            errorCount += batch.length;
+          const { data: existing } = await supabase
+            .from('all_products')
+            .select('id')
+            .eq('id', productId)
+            .maybeSingle();
+
+          if (existing) {
+            skippedCount++;
             continue;
           }
 
-          const productsData = await productsResponse.json();
+          const { error: insertError } = await supabase
+            .from('all_products')
+            .insert({
+              id: productId,
+              name: product.title || product.name || 'Unavngivet produkt',
+              price: product.price || 0,
+              image: product.image || product.imageUrl || '',
+              product_type: productType,
+              features: [],
+              keywords: []
+            });
 
-          for (const product of productsData.products) {
-            try {
-              const productId = `power-${product.id}`;
-
-              const { data: existing } = await supabase
-                .from('all_products')
-                .select('id')
-                .eq('id', productId)
-                .maybeSingle();
-
-              if (existing) {
-                skippedCount++;
-                continue;
-              }
-
-              const { error: insertError } = await supabase
-                .from('all_products')
-                .insert({
-                  id: productId,
-                  name: product.title || 'Unavngivet produkt',
-                  brand: product.brand || '',
-                  price: product.price || 0,
-                  image_url: product.mainImage || '',
-                  product_url: `https://www.power.dk/p-${product.id}/`,
-                  specifications: product.specifications || {},
-                  product_type: productType,
-                  keywords: [],
-                  keyword_categories: []
-                });
-
-              if (insertError) {
-                console.error('Error inserting product:', insertError);
-                errorCount++;
-              } else {
-                addedCount++;
-              }
-            } catch (err) {
-              console.error('Error processing product:', err);
-              errorCount++;
-            }
+          if (insertError) {
+            console.error('Error inserting product:', insertError);
+            errorCount++;
+          } else {
+            addedCount++;
           }
-
-          await new Promise(resolve => setTimeout(resolve, 200));
         } catch (err) {
-          console.error('Error processing batch:', err);
-          errorCount += batch.length;
+          console.error('Error processing product:', err);
+          errorCount++;
         }
+
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
 
       setProgress({
-        current: productIds.length,
-        total: productIds.length,
+        current: products.length,
+        total: products.length,
         message: `Færdig! Tilføjet: ${addedCount}, Sprunget over: ${skippedCount}, Fejl: ${errorCount}`
       });
 
